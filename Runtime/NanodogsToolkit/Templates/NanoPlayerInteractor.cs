@@ -19,6 +19,9 @@ namespace Nanodogs.UniversalScripts
         private bool hasHit;
         private RaycastHit lastHit;
 
+        // Keep track of what we’re hovering over
+        private NanoInteractable currentHovered;
+
         private void Update()
         {
             CheckForInteraction();
@@ -26,26 +29,48 @@ namespace Nanodogs.UniversalScripts
 
         private void CheckForInteraction()
         {
-            // Create a ray from the center of the screen
             lastRay = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-
             hasHit = Physics.Raycast(lastRay, out lastHit, interactDistance);
 
             if (hasHit)
             {
                 NanoInteractable interactable = lastHit.collider.GetComponent<NanoInteractable>();
+
                 if (interactable != null && interactable.isCurrentlyInteractable)
                 {
-                    interactable.hovering = true;
+                    // If we were hovering something else before, stop hovering it
+                    if (currentHovered != null && currentHovered != interactable)
+                        currentHovered.hovering = false;
+
+                    // Start hovering this one
+                    currentHovered = interactable;
+                    currentHovered.hovering = true;
 
                     if (interactKey != null && interactKey.action.WasPerformedThisFrame())
                     {
-                        interactable.Interact();
+                        currentHovered.Interact();
+                    }
+                }
+                else
+                {
+                    // We hit something that's not interactable — stop hovering the old one
+                    if (currentHovered != null)
+                    {
+                        currentHovered.hovering = false;
+                        currentHovered = null;
                     }
                 }
             }
+            else
+            {
+                // No hit at all — stop hovering if needed
+                if (currentHovered != null)
+                {
+                    currentHovered.hovering = false;
+                    currentHovered = null;
+                }
+            }
 
-            // Debug ray (visible in Game if Gizmos are on)
             Debug.DrawRay(lastRay.origin, lastRay.direction * interactDistance, hasHit ? Color.green : Color.red);
         }
 
@@ -57,9 +82,7 @@ namespace Nanodogs.UniversalScripts
             Gizmos.DrawLine(lastRay.origin, lastRay.origin + lastRay.direction * interactDistance);
 
             if (hasHit)
-            {
                 Gizmos.DrawSphere(lastHit.point, 0.05f);
-            }
         }
     }
 }
