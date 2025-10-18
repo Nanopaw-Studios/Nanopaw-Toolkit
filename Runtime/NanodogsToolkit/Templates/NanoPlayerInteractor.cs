@@ -15,6 +15,10 @@ namespace Nanodogs.UniversalScripts
         [Tooltip("Camera used for raycasting.")]
         public Camera cam;
 
+        private Ray lastRay;
+        private bool hasHit;
+        private RaycastHit lastHit;
+
         private void Update()
         {
             CheckForInteraction();
@@ -22,12 +26,14 @@ namespace Nanodogs.UniversalScripts
 
         private void CheckForInteraction()
         {
-            Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0)); // center of screen
-            RaycastHit hit;
+            // Create a ray from the center of the screen
+            lastRay = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
-            if (Physics.Raycast(ray, out hit, interactDistance))
+            hasHit = Physics.Raycast(lastRay, out lastHit, interactDistance);
+
+            if (hasHit)
             {
-                NanoInteractable interactable = hit.collider.GetComponent<NanoInteractable>();
+                NanoInteractable interactable = lastHit.collider.GetComponent<NanoInteractable>();
                 if (interactable != null && interactable.isCurrentlyInteractable)
                 {
                     interactable.hovering = true;
@@ -37,6 +43,22 @@ namespace Nanodogs.UniversalScripts
                         interactable.Interact();
                     }
                 }
+            }
+
+            // Debug ray (visible in Game if Gizmos are on)
+            Debug.DrawRay(lastRay.origin, lastRay.direction * interactDistance, hasHit ? Color.green : Color.red);
+        }
+
+        private void OnDrawGizmos()
+        {
+            if (cam == null) return;
+
+            Gizmos.color = hasHit ? Color.green : Color.red;
+            Gizmos.DrawLine(lastRay.origin, lastRay.origin + lastRay.direction * interactDistance);
+
+            if (hasHit)
+            {
+                Gizmos.DrawSphere(lastHit.point, 0.05f);
             }
         }
     }
