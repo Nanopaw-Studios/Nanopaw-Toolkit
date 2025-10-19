@@ -34,6 +34,7 @@ namespace Nanodogs.API.Nanoshake
             {
                 GameObject shakeHost = new GameObject("NanoshakeHost");
                 instance = shakeHost.AddComponent<Nanoshake>();
+                DontDestroyOnLoad(shakeHost);
             }
 
             Camera targetCamera = (useCustomCamera && customCamera != null) ? customCamera : Camera.main;
@@ -43,6 +44,7 @@ namespace Nanodogs.API.Nanoshake
                 return;
             }
 
+            instance.StopAllCoroutines();
             instance.StartCoroutine(instance.PerformShake(targetCamera, duration, magnitude, roughness));
         }
 
@@ -51,7 +53,10 @@ namespace Nanodogs.API.Nanoshake
             if (duration <= 0 || magnitude <= 0)
                 yield break;
 
-            Vector3 originalPosition = camera.transform.localPosition;
+            Transform camTransform = camera.transform;
+            Vector3 originalPosition = camTransform.localPosition;
+            Quaternion originalRotation = camTransform.localRotation;
+
             float elapsed = 0f;
 
             // Use Perlin noise for smoother, organic shake
@@ -76,12 +81,22 @@ namespace Nanodogs.API.Nanoshake
 
                 Vector3 offset = new Vector3(offsetX, offsetY, offsetZ) * strength;
 
-                camera.transform.localPosition = originalPosition + offset;
+                camTransform.localPosition = originalPosition + offset;
 
                 yield return null;
             }
 
-            camera.transform.localPosition = originalPosition;
+            // Smoothly restore to original position at the end of the shake
+            float t = 0f;
+            const float restoreTime = 0.1f;
+            while (t < restoreTime)
+            {
+                t += Time.deltaTime;
+                camTransform.localPosition = Vector3.Lerp(camTransform.localPosition, new Vector3(0, 0.5f, 0), t / restoreTime);
+                yield return null;
+            }
+
+            camTransform.localPosition = new Vector3(0, 0.5f, 0);
         }
     }
 }
