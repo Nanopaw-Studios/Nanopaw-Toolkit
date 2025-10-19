@@ -19,3 +19,4 @@ MonoBehaviour:
   useGravity: 1
   damage: 50
   explosionEffectPrefab: {fileID: 2417492179012752419, guid: a098ee8acac4c2c40903fef86edfd7d1, type: 3}
+  explosionSFX: {fileID: 8300000, guid: 606bdf9d778966942933ed54a6e0b991, type: 3}

@@ -17,5 +17,6 @@ namespace Nanodogs.API.Explosion
         public bool useGravity = true;
         public float damage = 50f;
         public GameObject explosionEffectPrefab;
+        public AudioClip explosionSFX;
     }
 }

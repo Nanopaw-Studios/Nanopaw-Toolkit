@@ -25,6 +25,10 @@ namespace Nanodogs.API.Explosion
                 explosionEffect.tag = "Explosion";
                 MonoBehaviour.Destroy(explosionEffect, 4f); // Destroy effect after 2 seconds
             }
+            if (settings.explosionSFX != null)
+            {
+                AudioSource.PlayClipAtPoint(settings.explosionSFX, position);
+            }
             if (useCameraShake)
             {
                 // Trigger camera shake effect
