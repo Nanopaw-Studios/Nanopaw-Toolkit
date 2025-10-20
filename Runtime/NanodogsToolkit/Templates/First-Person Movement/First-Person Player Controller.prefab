@@ -37,7 +37,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6571762992440134370}
+  - {fileID: 5826257944945842293}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &3930168830213518319
@@ -129,7 +129,7 @@ Rigidbody:
   serializedVersion: 5
   m_Mass: 1
   m_LinearDamping: 0
-  m_AngularDamping: 0.05
+  m_AngularDamping: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -143,9 +143,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 112
-  m_CollisionDetection: 2
+  m_CollisionDetection: 0
 --- !u!114 &4372157008490153262
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -164,6 +164,7 @@ MonoBehaviour:
   rb: {fileID: 6939925807832477495}
   moveAction: {fileID: -1913246952516052684, guid: a03cd7f3852b81443aaa5a09de549850, type: 3}
   jumpAction: {fileID: 5052146654967967306, guid: a03cd7f3852b81443aaa5a09de549850, type: 3}
+  accelerationSmoothTime: 0.08
   onLadder: 0
   ladderClimbSpeed: 7
   ladderStickStrength: 10
@@ -226,9 +227,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Nanodogs.Tooklit::Nanodogs.UniversalScripts.NanoPlayerInteractor
   interactKey: {fileID: 2096039558608658515, guid: a03cd7f3852b81443aaa5a09de549850, type: 3}
   interactDistance: 3
-  interactableLayer:
-    serializedVersion: 2
-    m_Bits: 8
   cam: {fileID: 3308917645082229979}
 --- !u!82 &7904011625370299997
 AudioSource:
@@ -327,6 +325,38 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1 &6912675727240208871
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5826257944945842293}
+  m_Layer: 0
+  m_Name: Player Yaw
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5826257944945842293
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6912675727240208871}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6571762992440134370}
+  m_Father: {fileID: 2759690086907853745}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7860781731046425556
 GameObject:
   m_ObjectHideFlags: 0
@@ -355,12 +385,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7860781731046425556}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 2759690086907853745}
+  m_Father: {fileID: 5826257944945842293}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &3308917645082229979
 Camera:
@@ -478,7 +508,108 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   lookAction: {fileID: 5310133040201488025, guid: a03cd7f3852b81443aaa5a09de549850, type: 3}
+  moveAction: {fileID: -1913246952516052684, guid: a03cd7f3852b81443aaa5a09de549850, type: 3}
   mouseSensitivity: 25
   gamepadSensitivity: 275
-  smoothTime: 0.075
-  playerBody: {fileID: 2759690086907853745}
+  smoothTime: 0.5
+  yawPivot: {fileID: 5826257944945842293}
+  enableHeadBob: 1
+  bobFrequency: 2
+  bobAmplitude: 0.2
+  bobFadeSpeed: 6
+  bobStartThreshold: 0.1
+  bobCurveX:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.50063765
+      value: 0.99304026
+      inSlope: -0.00868621
+      outSlope: -0.00868621
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.5814423
+    - serializedVersion: 3
+      time: 1.0124979
+      value: -0.0023800442
+      inSlope: 0.009857263
+      outSlope: 0.009857263
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.47600463
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  bobCurveY:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.22617733
+      value: 1.0023428
+      inSlope: 0.014995485
+      outSlope: 0.014995485
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.30278555
+    - serializedVersion: 3
+      time: 0.5087996
+      value: 0.0032367706
+      inSlope: 0.0039832266
+      outSlope: 0.0039832266
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.8606284
+    - serializedVersion: 3
+      time: 0.758973
+      value: 1.0049438
+      inSlope: -0.00082615163
+      outSlope: -0.00082615163
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.86852884
+    - serializedVersion: 3
+      time: 1.0124979
+      value: -0.0023800442
+      inSlope: 0.009857263
+      outSlope: 0.009857263
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.47600463
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  enableLandingBob: 1
+  landingBobAmount: 0.1
+  landingBobSpeed: 10
+  landingBobReturnSpeed: 6
+  landingVelocityThreshold: -4
+  playerRigidbody: {fileID: 6939925807832477495}
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 1
+  groundCheckDistance: 0.5
+  groundCheckOrigin: {fileID: 2759690086907853745}

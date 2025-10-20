@@ -1,4 +1,4 @@
-// � 2025 Nanodogs Studios. All rights reserved.
+﻿// © 2025 Nanodogs Studios. All rights reserved.
 
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,6 +14,12 @@ namespace Nanodogs.UniversalScripts
         public InputActionReference jumpAction;
 
         private Vector3 inputDir;
+
+        [Header("Smoothing")]
+        [Tooltip("Lower = snappier movement, Higher = smoother movement.")]
+        public float accelerationSmoothTime = 0.08f;
+        private Vector3 currentVelocity;
+        private Vector3 smoothVelocity;
 
         [Header("Ladder Settings")]
         public bool onLadder = false;
@@ -57,10 +63,25 @@ namespace Nanodogs.UniversalScripts
             if (moveAction == null || jumpAction == null) return;
 
             Vector2 moveInput = moveAction.action.ReadValue<Vector2>();
-            inputDir = (transform.right * moveInput.x + transform.forward * moveInput.y).normalized;
-            if (inputDir.magnitude > 1f) inputDir.Normalize();
 
-            // Handle jump on ground
+            // Camera-relative movement
+            Transform cam = Camera.main.transform;
+            Vector3 camForward = cam.forward;
+            Vector3 camRight = cam.right;
+
+            // Remove any vertical tilt (important for head-bob, slopes, etc.)
+            camForward.y = 0f;
+            camRight.y = 0f;
+            camForward.Normalize();
+            camRight.Normalize();
+
+            Vector3 targetDir = (camRight * moveInput.x + camForward * moveInput.y);
+            if (targetDir.magnitude > 1f) targetDir.Normalize();
+
+            // Smooth input direction
+            inputDir = Vector3.Lerp(inputDir, targetDir, Time.deltaTime * 10f);
+
+            // Handle jump
             if (jumpAction.action.WasPressedThisFrame() && IsGrounded() && !onLadder)
             {
                 rb.AddForce(Vector3.up * jumpForce, ForceMode.VelocityChange);
@@ -70,13 +91,21 @@ namespace Nanodogs.UniversalScripts
             HandleFootsteps(moveInput);
         }
 
+
         private void FixedUpdate()
         {
             if (!onLadder)
             {
                 Vector3 targetVelocity = inputDir * speed;
                 targetVelocity.y = rb.linearVelocity.y;
-                rb.linearVelocity = targetVelocity;
+
+                // Smooth movement to avoid stutter
+                rb.linearVelocity = Vector3.SmoothDamp(
+                    rb.linearVelocity,
+                    targetVelocity,
+                    ref smoothVelocity,
+                    accelerationSmoothTime
+                );
             }
         }
 
