@@ -58,6 +58,7 @@ public class Nanoloader : MonoBehaviour
         textComponent.rectTransform.anchorMin = new Vector2(0, 0);
         textComponent.rectTransform.anchorMax = new Vector2(0, 0);
         textComponent.rectTransform.pivot = new Vector2(0, 0);
+        textComponent.rectTransform.sizeDelta = new Vector2(300, 200);
         textComponent.rectTransform.anchoredPosition = new Vector2(10, 10);
         return canvasObj;
     }
