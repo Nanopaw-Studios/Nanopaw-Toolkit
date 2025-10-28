@@ -6,7 +6,7 @@ namespace Nanodogs.Toolkit.MapBuilding
 {
     public class InvisWaller : EditorWindow
     {
-        [MenuItem("Nanodogs/Tools/Utilities/Map Building/Invis Waller")]
+        [MenuItem("Nanodogs/Tools/Utilites/Map Building/Invis Waller")]
         public static void ShowWindow()
         {
             GetWindow<InvisWaller>("Invis Waller");
