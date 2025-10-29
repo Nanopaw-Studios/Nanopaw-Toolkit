@@ -21,12 +21,17 @@ public class NPC : MonoBehaviour
     public float stopDistance = 2f;    // Distance at which NPC stops fleeing
     public float followRadius = 10f;   // Radius at which NPC starts following the player
 
-    bool isInSquad = false;
+    bool isInSquad = true;
     bool isMoving;
     bool hasReachedSafeDistance = false;
 
     GameObject player;
     NavMeshAgent agent;
+
+    private void Start()
+    {
+        agent = GetComponent<NavMeshAgent>();
+    }
 
     public void OnJoinSquad()
     {
@@ -34,22 +39,16 @@ public class NPC : MonoBehaviour
         isInSquad = true;
     }
 
-    void Start()
-    {
-        player = GameObject.FindGameObjectWithTag("Player");
-        agent = GetComponent<NavMeshAgent>();
-
-        if (player == null)
-        {
-            Debug.LogError("Make sure your player is tagged with 'Player'!");
-        }
-
-        // handle npctype cases
-    }
-
     void Update()
     {
-        if(isInSquad)
+        player = GameObject.FindGameObjectWithTag("Player");
+        if (player == null)
+        {
+            Debug.LogError("Looking again!");
+            player = GameObject.FindGameObjectWithTag("Player");
+        }
+
+        if (isInSquad)
         {
             // Use OverlapSphere to detect nearby objects
             Collider[] hitColliders = Physics.OverlapSphere(transform.position, followRadius);
@@ -75,7 +74,7 @@ public class NPC : MonoBehaviour
             {
                 FleeFromPlayer();
             }
-            else if (!playerNearby)
+            else if (playerNearby)
             {
                 FollowPlayer();
             }
