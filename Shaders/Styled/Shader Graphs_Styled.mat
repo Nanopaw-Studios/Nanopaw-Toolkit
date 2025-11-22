@@ -53,7 +53,7 @@ Material:
     m_Floats:
     - _FillFuzziness: 1.63
     - _FillRange: 0.08
-    - _GradientColor: 1
+    - _GradientColor: 0
     - _Power: 1
     - _QueueControl: 0
     - _QueueOffset: 0

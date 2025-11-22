@@ -123,11 +123,14 @@ Material:
     - _Do_SSR: 0
     - _DstBlend: 0
     - _DstBlendAlpha: 0
+    - _EmissionIntensity: 1
     - _EnvironmentReflections: 1
+    - _Fresnel_Power: 4.99
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
+    - _Normal_Strength: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.005
     - _QueueControl: 0
@@ -154,7 +157,7 @@ Material:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _Color_Map_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Color_Map_Tiling: {r: 1, g: 1, b: 0, a: 0}
-    - _Emission: {r: 3.031433, g: 3.031433, b: 3.031433, a: 1}
+    - _Emission: {r: 1.39772, g: 1.39772, b: 1.39772, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _Emission_Offset: {r: 0, g: 0, b: 0, a: 0}
     - _Emission_Tiling: {r: 1, g: 1, b: 0, a: 0}
