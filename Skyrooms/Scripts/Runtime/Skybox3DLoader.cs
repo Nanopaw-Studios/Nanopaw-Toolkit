@@ -27,6 +27,10 @@ namespace Nanodogs.Skyrooms
                 skyboxCamera.transform.position = Camera.main.transform.position * settings.scale + settings.offset;
                 skyboxCamera.transform.rotation = Camera.main.transform.rotation;
             }
+            else
+            {
+                skyboxCamera = Camera.main;
+            }
         }
 
         public static void LoadSkybox(Skybox3DSettings s)

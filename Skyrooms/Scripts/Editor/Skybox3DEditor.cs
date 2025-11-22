@@ -10,10 +10,10 @@ namespace Nanodogs.Skyrooms
         private Skybox3DSettings settings;
         private Scene loadedScene;
 
-        [MenuItem("Tools/3D Skybox Editor")]
+        [MenuItem("Nanodogs/Tools/Utilites/Map Building/Skyrooms Editor")]
         public static void ShowWindow()
         {
-            GetWindow<Skybox3DEditor>("3D Skybox Editor");
+            GetWindow<Skybox3DEditor>("Skyrooms Editor");
         }
 
         private void OnGUI()
