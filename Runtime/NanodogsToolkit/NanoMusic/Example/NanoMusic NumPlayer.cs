@@ -1,16 +1,16 @@
 using UnityEngine;
 
-public class NanoMusicNumPlayer : MonoBehaviour
+namespace Nanodogs.API.NanoMusic.Example
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    /// <summary>
+    /// Example script for playing NanoMusic assets.
+    /// </summary>
+    public class NanoMusicNumPlayer : MonoBehaviour
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        public NanoMusicAsset currentMusic;
+        public void PlayMusic()
+        {
+            NanoMusic.Instance.PlayMusic(currentMusic);
+        }
     }
 }

@@ -2,11 +2,26 @@ using UnityEngine;
 
 namespace Nanodogs.Skyrooms
 {
-    [CreateAssetMenu(fileName = "New3DSkyboxSettings", menuName = "Skyrooms/3D Skybox Settings")]
+    [CreateAssetMenu(fileName = "Skybox3DSettings", menuName = "Nanodogs/Skyrooms/Skybox3DSettings")]
     public class Skybox3DSettings : ScriptableObject
     {
-        public SceneReference skyboxScene;   // Custom type, see below
-        public float scale = 0.0625f;
+        public SkyboxSceneReference skyboxScene;
+        public float scale = 1f;
         public Vector3 offset = Vector3.zero;
+    }
+
+    [System.Serializable]
+    public class SkyboxSceneReference
+    {
+        public UnityEditor.SceneAsset sceneAsset;
+        public string sceneName;
+
+        public void UpdateSceneName()
+        {
+            if (sceneAsset != null)
+            {
+                sceneName = sceneAsset.name;
+            }
+        }
     }
 }
