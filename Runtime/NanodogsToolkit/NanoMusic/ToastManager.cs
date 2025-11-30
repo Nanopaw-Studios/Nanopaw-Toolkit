@@ -8,9 +8,8 @@ namespace Nanodogs.API.NanoMusic
     /// <summary>
     /// Manages music Toasts in the NanoMusic system.
     /// </summary>
-    public class ToastManager : MonoBehaviour
+    public class ToastManager : MonoBehaviourRequireNanoMusic
     {
-        public NanoMusic music;
         public GameObject toastPrefab;
 
         private GameObject currentToast;
