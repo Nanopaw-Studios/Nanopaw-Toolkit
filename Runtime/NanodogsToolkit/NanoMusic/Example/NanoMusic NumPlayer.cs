@@ -7,10 +7,11 @@ namespace Nanodogs.API.NanoMusic.Example
     /// </summary>
     public class NanoMusicNumPlayer : MonoBehaviour
     {
+        public NanoMusic music;
         public NanoMusicAsset currentMusic;
-        public void PlayMusic()
+        public void Start()
         {
-            NanoMusic.Instance.PlayMusic(currentMusic);
+            music.PlayMusic(currentMusic);
         }
     }
 }

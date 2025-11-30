@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace Nanodogs.API.NanoMusic
 {
@@ -13,6 +14,10 @@ namespace Nanodogs.API.NanoMusic
         [SerializeField] private AudioSource musicSource;
 
         public NanoMusicAsset CurrentPlaying { get; private set; }
+
+        public UnityEvent<NanoMusicAsset> OnMusicStarted = new();
+        public UnityEvent<NanoMusicAsset> OnMusicChanged = new();
+        public UnityEvent<NanoMusicAsset> OnMusicStopped = new();
 
         private void Awake()
         {
@@ -55,7 +60,31 @@ namespace Nanodogs.API.NanoMusic
             musicSource.Play();
 
             CurrentPlaying = musicAsset;
-            Debug.Log($"Playing music: {musicAsset.musicClip.name}");
+            Debug.Log($"Playing music: {musicAsset.songData.songName}");
+
+            OnMusicStarted.Invoke(musicAsset);
+        }
+
+        public void ChangeMusic(NanoMusicAsset newMusicAsset)
+        {
+            if (newMusicAsset == null || newMusicAsset.musicClip == null)
+            {
+                Debug.LogWarning("Invalid music asset or clip.");
+                return;
+            }
+            if (CurrentPlaying == newMusicAsset)
+                return;
+
+            musicSource.clip = newMusicAsset.musicClip;
+            musicSource.volume = newMusicAsset.volume;
+            musicSource.pitch = newMusicAsset.pitch;
+            musicSource.loop = newMusicAsset.loop;
+            musicSource.Play();
+
+            CurrentPlaying = newMusicAsset;
+            Debug.Log($"Changed music to: {newMusicAsset.songData.songName}");
+
+            OnMusicChanged.Invoke(newMusicAsset);
         }
 
         /// <summary>
@@ -71,6 +100,7 @@ namespace Nanodogs.API.NanoMusic
 
             musicSource.Stop();
             Debug.Log($"Stopped music: {CurrentPlaying.musicClip.name}");
+            OnMusicStopped.Invoke(CurrentPlaying);
             CurrentPlaying = null;
         }
 
