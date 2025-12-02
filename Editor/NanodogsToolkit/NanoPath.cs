@@ -14,7 +14,7 @@ public static class NanoPath
     private static string _rootAssetPath; // e.g. "Assets/Nanodogs-Toolkit" or "Packages/Nanodogs-Toolkit"
     private static string _rootFullPath;
 
-    private const string ToolkitFolderName = "Nanodogs-Toolkit";
+    private const string ToolkitFolderName = "Nanodogs Toolkit";
 
     public static string RootAssetPath
     {
@@ -96,7 +96,7 @@ public static class NanoPath
             : Path.Combine(RootFullPath, "Editor", "NanodogsToolkit", "Import");
 
     // ----------------------------------------------------------------------
-    // Root detection: EXPLICIT folder named "Nanodogs-Toolkit"
+    // Root detection: EXPLICIT folder named "Nanodogs Toolkit"
     // ----------------------------------------------------------------------
     private static string FindToolkitRootAssetPath()
     {
@@ -142,7 +142,7 @@ public static class NanoPath
         {
             Debug.LogError(
                 $"NanoPath: Could not locate '{ToolkitFolderName}' folder. " +
-                "Expected a folder literally named 'Nanodogs-Toolkit' under 'Assets/' or 'Packages/'."
+                "Expected a folder literally named 'Nanodogs Toolkit' under 'Assets/' or 'Packages/'."
             );
             return null;
         }
@@ -159,7 +159,7 @@ public static class NanoPath
         if (candidates.Count > 1)
         {
             Debug.LogWarning(
-                "NanoPath: Multiple 'Nanodogs-Toolkit' folders found. Using: " + chosen +
+                "NanoPath: Multiple 'Nanodogs Toolkit' folders found. Using: " + chosen +
                 "\nAll candidates:\n" + string.Join("\n", candidates)
             );
         }
