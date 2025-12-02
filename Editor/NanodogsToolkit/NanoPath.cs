@@ -2,8 +2,6 @@
 using UnityEditor;
 using UnityEngine;
 using System.IO;
-using PackageInfo = UnityEditor.PackageManager.PackageInfo;
-
 
 #if UNITY_2019_1_OR_NEWER
 using UnityEditor.PackageManager;
@@ -11,9 +9,13 @@ using UnityEditor.PackageManager;
 
 public static class NanoPath
 {
-    private static string _rootAssetPath; // e.g. "Assets/Plugins/Nanodogs-Toolkit" or "Packages/com.yourcompany.toolkit/Nanodogs-Toolkit"
-    private static string _rootFullPath;  // e.g. "C:\Project\Assets\Plugins\Nanodogs-Toolkit" or actual package cache path
+    // e.g. "Assets/Plugins/Nanodogs-Toolkit" or "Packages/com.nanodogs.toolkit"
+    private static string _rootAssetPath;
 
+    // e.g. "C:\Project\Assets\Plugins\Nanodogs-Toolkit" or real package cache path
+    private static string _rootFullPath;
+
+    // Only used for logging now, not for path detection
     private const string ToolkitFolderName = "Nanodogs-Toolkit";
 
     public static string RootAssetPath
@@ -40,7 +42,7 @@ public static class NanoPath
             // Assets/...
             if (RootAssetPath.StartsWith("Assets"))
             {
-                // Application.dataPath is full path to "Assets".
+                // Application.dataPath is the full path to "Assets"
                 string relative = RootAssetPath.Substring("Assets".Length)
                     .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, '/');
 
@@ -52,17 +54,19 @@ public static class NanoPath
             else if (RootAssetPath.StartsWith("Packages/"))
             {
 #if UNITY_2019_1_OR_NEWER
-                var packageInfo = PackageInfo.FindForAssetPath(RootAssetPath);
+                var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath(RootAssetPath);
                 if (packageInfo != null)
                 {
-                    // packageInfo.assetPath is like "Packages/com.yourcompany.toolkit"
+                    // packageInfo.assetPath: "Packages/com.nanodogs.toolkit"
                     string rel = RootAssetPath.Substring(packageInfo.assetPath.Length)
                         .TrimStart('/', Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
                     // packageInfo.resolvedPath is the real filesystem path
                     _rootFullPath = string.IsNullOrEmpty(rel)
                         ? packageInfo.resolvedPath
-                        : Path.GetFullPath(Path.Combine(packageInfo.resolvedPath, rel.Replace('/', Path.DirectorySeparatorChar)));
+                        : Path.GetFullPath(Path.Combine(
+                            packageInfo.resolvedPath,
+                            rel.Replace('/', Path.DirectorySeparatorChar)));
                 }
                 else
                 {
@@ -84,6 +88,8 @@ public static class NanoPath
         }
     }
 
+    // --- Derived paths (null-safe) ---
+
     public static string PrefabsAssetPath =>
         string.IsNullOrEmpty(RootAssetPath)
             ? null
@@ -94,33 +100,37 @@ public static class NanoPath
             ? null
             : Path.Combine(RootFullPath, "Editor", "NanodogsToolkit", "Import");
 
+    // --- Root detection ---
+
     private static string FindToolkitRootAssetPath()
     {
         // Search for package.json or README.md in both Assets and Packages
-        string[] guids = AssetDatabase.FindAssets("t:TextAsset", new[] { "Assets", "Packages" });
+        string[] searchFolders = { "Assets", "Packages" };
+        string[] guids = AssetDatabase.FindAssets("t:TextAsset", searchFolders);
 
         foreach (var guid in guids)
         {
             string assetPath = AssetDatabase.GUIDToAssetPath(guid);
             string fileName = Path.GetFileName(assetPath);
 
-            if (fileName == "package.json" || fileName == "README.md")
-            {
-                int idx = assetPath.IndexOf(ToolkitFolderName, System.StringComparison.OrdinalIgnoreCase);
-                if (idx != -1)
-                {
-                    string root = assetPath
-                        .Substring(0, idx + ToolkitFolderName.Length)
-                        .Replace('\\', '/');
+            if (fileName != "package.json" && fileName != "README.md")
+                continue;
 
-                    return root;
-                }
-            }
+            // Folder that contains package.json / README.md is considered the root
+            string root = Path.GetDirectoryName(assetPath)?.Replace('\\', '/');
+            if (string.IsNullOrEmpty(root))
+                continue;
+
+            // OPTIONAL: If you still want to enforce the folder name when under Assets:
+            // if (root.StartsWith("Assets") && Path.GetFileName(root) != ToolkitFolderName)
+            //     continue;
+
+            return root;
         }
 
         Debug.LogError(
-            $"NanoPath: Could not locate '{ToolkitFolderName}' root. " +
-            "Make sure package.json or README.md exists in the toolkit root (under Assets/ or Packages/)."
+            $"NanoPath: Could not locate toolkit root. " +
+            $"Make sure a package.json or README.md exists in the Nanodogs toolkit root (under Assets/ or Packages/)."
         );
         return null;
     }
