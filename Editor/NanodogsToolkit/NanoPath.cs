@@ -2,6 +2,8 @@
 using UnityEditor;
 using UnityEngine;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 
 #if UNITY_2019_1_OR_NEWER
 using UnityEditor.PackageManager;
@@ -9,13 +11,9 @@ using UnityEditor.PackageManager;
 
 public static class NanoPath
 {
-    // e.g. "Assets/Plugins/Nanodogs-Toolkit" or "Packages/com.nanodogs.toolkit"
-    private static string _rootAssetPath;
-
-    // e.g. "C:\Project\Assets\Plugins\Nanodogs-Toolkit" or real package cache path
+    private static string _rootAssetPath; // e.g. "Assets/Nanodogs-Toolkit" or "Packages/Nanodogs-Toolkit"
     private static string _rootFullPath;
 
-    // Only used for logging now, not for path detection
     private const string ToolkitFolderName = "Nanodogs-Toolkit";
 
     public static string RootAssetPath
@@ -57,11 +55,10 @@ public static class NanoPath
                 var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath(RootAssetPath);
                 if (packageInfo != null)
                 {
-                    // packageInfo.assetPath: "Packages/com.nanodogs.toolkit"
+                    // packageInfo.assetPath: "Packages/com.your.package" or "Packages/Nanodogs-Toolkit"
                     string rel = RootAssetPath.Substring(packageInfo.assetPath.Length)
                         .TrimStart('/', Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
-                    // packageInfo.resolvedPath is the real filesystem path
                     _rootFullPath = string.IsNullOrEmpty(rel)
                         ? packageInfo.resolvedPath
                         : Path.GetFullPath(Path.Combine(
@@ -88,8 +85,6 @@ public static class NanoPath
         }
     }
 
-    // --- Derived paths (null-safe) ---
-
     public static string PrefabsAssetPath =>
         string.IsNullOrEmpty(RootAssetPath)
             ? null
@@ -100,38 +95,75 @@ public static class NanoPath
             ? null
             : Path.Combine(RootFullPath, "Editor", "NanodogsToolkit", "Import");
 
-    // --- Root detection ---
-
+    // ----------------------------------------------------------------------
+    // Root detection: EXPLICIT folder named "Nanodogs-Toolkit"
+    // ----------------------------------------------------------------------
     private static string FindToolkitRootAssetPath()
     {
-        // Search for package.json or README.md in both Assets and Packages
+        // Look only under Assets and Packages
         string[] searchFolders = { "Assets", "Packages" };
-        string[] guids = AssetDatabase.FindAssets("t:TextAsset", searchFolders);
+
+        // Search for DefaultAssets (folders & misc assets), filtered by name
+        string[] guids = AssetDatabase.FindAssets(
+            $"t:DefaultAsset {ToolkitFolderName}",
+            searchFolders
+        );
+
+        var candidates = new List<string>();
 
         foreach (var guid in guids)
         {
-            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-            string fileName = Path.GetFileName(assetPath);
-
-            if (fileName != "package.json" && fileName != "README.md")
+            string path = AssetDatabase.GUIDToAssetPath(guid).Replace('\\', '/');
+            if (string.IsNullOrEmpty(path))
                 continue;
 
-            // Folder that contains package.json / README.md is considered the root
-            string root = Path.GetDirectoryName(assetPath)?.Replace('\\', '/');
-            if (string.IsNullOrEmpty(root))
+            // If the asset itself is a folder named Nanodogs-Toolkit
+            if (AssetDatabase.IsValidFolder(path) &&
+                string.Equals(Path.GetFileName(path), ToolkitFolderName, System.StringComparison.OrdinalIgnoreCase))
+            {
+                candidates.Add(path);
+                continue;
+            }
+
+            // Otherwise, check the folder that contains this asset
+            string dir = Path.GetDirectoryName(path)?.Replace('\\', '/');
+            if (string.IsNullOrEmpty(dir))
                 continue;
 
-            // OPTIONAL: If you still want to enforce the folder name when under Assets:
-            // if (root.StartsWith("Assets") && Path.GetFileName(root) != ToolkitFolderName)
-            //     continue;
-
-            return root;
+            string folderName = Path.GetFileName(dir);
+            if (string.Equals(folderName, ToolkitFolderName, System.StringComparison.OrdinalIgnoreCase) &&
+                AssetDatabase.IsValidFolder(dir))
+            {
+                candidates.Add(dir);
+            }
         }
 
-        Debug.LogError(
-            $"NanoPath: Could not locate toolkit root. " +
-            $"Make sure a package.json or README.md exists in the Nanodogs toolkit root (under Assets/ or Packages/)."
-        );
-        return null;
+        if (candidates.Count == 0)
+        {
+            Debug.LogError(
+                $"NanoPath: Could not locate '{ToolkitFolderName}' folder. " +
+                "Expected a folder literally named 'Nanodogs-Toolkit' under 'Assets/' or 'Packages/'."
+            );
+            return null;
+        }
+
+        // Deduplicate
+        candidates = candidates.Distinct().ToList();
+
+        // If multiple, prefer Assets/ over Packages/
+        string chosen = candidates
+            .OrderBy(p => p.StartsWith("Assets/") ? 0 : 1)
+            .First();
+
+        // Optional: log if more than one found
+        if (candidates.Count > 1)
+        {
+            Debug.LogWarning(
+                "NanoPath: Multiple 'Nanodogs-Toolkit' folders found. Using: " + chosen +
+                "\nAll candidates:\n" + string.Join("\n", candidates)
+            );
+        }
+
+        return chosen;
     }
 }
