@@ -11,9 +11,10 @@ using UnityEditor.PackageManager;
 
 public static class NanoPath
 {
-    private static string _rootAssetPath; // e.g. "Assets/Nanodogs-Toolkit" or "Packages/Nanodogs-Toolkit"
+    private static string _rootAssetPath; // e.g. "Assets/Nanodogs Toolkit" or "Packages/com.your.package/Nanodogs Toolkit"
     private static string _rootFullPath;
 
+    // Exact folder name in the Project window
     private const string ToolkitFolderName = "Nanodogs Toolkit";
 
     public static string RootAssetPath
@@ -55,7 +56,7 @@ public static class NanoPath
                 var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssetPath(RootAssetPath);
                 if (packageInfo != null)
                 {
-                    // packageInfo.assetPath: "Packages/com.your.package" or "Packages/Nanodogs-Toolkit"
+                    // packageInfo.assetPath: "Packages/com.your.package"
                     string rel = RootAssetPath.Substring(packageInfo.assetPath.Length)
                         .TrimStart('/', Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
@@ -100,49 +101,16 @@ public static class NanoPath
     // ----------------------------------------------------------------------
     private static string FindToolkitRootAssetPath()
     {
-        // Look only under Assets and Packages
-        string[] searchFolders = { "Assets", "Packages" };
-
-        // Search for DefaultAssets (folders & misc assets), filtered by name
-        string[] guids = AssetDatabase.FindAssets(
-            $"t:DefaultAsset {ToolkitFolderName}",
-            searchFolders
-        );
-
         var candidates = new List<string>();
 
-        foreach (var guid in guids)
-        {
-            string path = AssetDatabase.GUIDToAssetPath(guid).Replace('\\', '/');
-            if (string.IsNullOrEmpty(path))
-                continue;
-
-            // If the asset itself is a folder named Nanodogs-Toolkit
-            if (AssetDatabase.IsValidFolder(path) &&
-                string.Equals(Path.GetFileName(path), ToolkitFolderName, System.StringComparison.OrdinalIgnoreCase))
-            {
-                candidates.Add(path);
-                continue;
-            }
-
-            // Otherwise, check the folder that contains this asset
-            string dir = Path.GetDirectoryName(path)?.Replace('\\', '/');
-            if (string.IsNullOrEmpty(dir))
-                continue;
-
-            string folderName = Path.GetFileName(dir);
-            if (string.Equals(folderName, ToolkitFolderName, System.StringComparison.OrdinalIgnoreCase) &&
-                AssetDatabase.IsValidFolder(dir))
-            {
-                candidates.Add(dir);
-            }
-        }
+        CollectToolkitFolders("Assets", candidates);
+        CollectToolkitFolders("Packages", candidates);
 
         if (candidates.Count == 0)
         {
             Debug.LogError(
                 $"NanoPath: Could not locate '{ToolkitFolderName}' folder. " +
-                "Expected a folder literally named 'Nanodogs Toolkit' under 'Assets/' or 'Packages/'."
+                $"Expected a folder literally named '{ToolkitFolderName}' under 'Assets/' or 'Packages/'."
             );
             return null;
         }
@@ -155,15 +123,34 @@ public static class NanoPath
             .OrderBy(p => p.StartsWith("Assets/") ? 0 : 1)
             .First();
 
-        // Optional: log if more than one found
         if (candidates.Count > 1)
         {
             Debug.LogWarning(
-                "NanoPath: Multiple 'Nanodogs Toolkit' folders found. Using: " + chosen +
+                $"NanoPath: Multiple '{ToolkitFolderName}' folders found. Using: {chosen}" +
                 "\nAll candidates:\n" + string.Join("\n", candidates)
             );
         }
 
         return chosen;
+    }
+
+    private static void CollectToolkitFolders(string root, List<string> results)
+    {
+        if (!AssetDatabase.IsValidFolder(root))
+            return;
+
+        foreach (var folder in AssetDatabase.GetSubFolders(root))
+        {
+            string normalized = folder.Replace('\\', '/');
+            string name = Path.GetFileName(normalized);
+
+            if (string.Equals(name, ToolkitFolderName, System.StringComparison.OrdinalIgnoreCase))
+            {
+                results.Add(normalized);
+            }
+
+            // Recurse into subfolders
+            CollectToolkitFolders(normalized, results);
+        }
     }
 }
