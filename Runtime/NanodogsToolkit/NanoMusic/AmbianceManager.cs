@@ -9,7 +9,7 @@ namespace Nanodogs.API.NanoMusic
     /// <summary>
     /// Manages ambiance music in the NanoMusic system.
     /// </summary>
-    public class AmbianceManager : MonoBehaviourRequireNanoMusic
+    public class AmbianceManager : MonoBehaviour
     {
         public NanoMusicAsset[] ambianceTracks;
         private int currentTrackIndex = -1;
