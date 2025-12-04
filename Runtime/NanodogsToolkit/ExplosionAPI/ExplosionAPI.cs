@@ -46,10 +46,20 @@ namespace Nanodogs.API.Explosion
                     rb.useGravity = settings.useGravity;
                 }
 
+                if (hit == null)
+                {
+                    // In editor, destroyed objects can leave nulls in the overlap results.
+                    continue;
+                }
+
                 if (hit.CompareTag("Fracturer"))
                 {
-                    // Look on this object first, then its parents (handles collider-on-child, script-on-parent setups)
-                    Fracture frac = hit.GetComponent<Fracture>() ?? hit.GetComponentInParent<Fracture>();
+                    // Try on this object first
+                    Fracture frac = hit.GetComponent<Fracture>();
+
+                    // Also try parents in case collider is on a child and Fracture is on the root
+                    if (frac == null)
+                        frac = hit.GetComponentInParent<Fracture>();
 
                     if (frac != null)
                     {
@@ -57,9 +67,16 @@ namespace Nanodogs.API.Explosion
                     }
                     else
                     {
-                        Debug.LogWarning($"Explosion hit object tagged 'Fracturer' but with no Fracture component: {hit.name}", hit);
+                        // Optional, but super helpful while debugging
+                        #if UNITY_EDITOR
+                        Debug.LogWarning(
+                            $"Explosion hit object tagged 'Fracturer' but no Fracture component was found on it or its parents: {hit.name}",
+                            hit
+                        );
+                        #endif
                     }
                 }
+
 
                 // TODO: Apply damage to objects with a Health component
                 // add this!!!!
