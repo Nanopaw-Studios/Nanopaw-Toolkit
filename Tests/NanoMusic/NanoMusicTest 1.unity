@@ -1357,10 +1357,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5083698f86631754b8bb99748bd4aaf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  music: {fileID: 726493508}
   ambianceTracks:
   - {fileID: 11400000, guid: d9df82918a16d454387403f05bc63cb3, type: 2}
   - {fileID: 11400000, guid: 01b83dda49b893d4ab2b804aa2bd1671, type: 2}
+  minimumRandomTime: 40
+  maximumRandomTime: 140
   isMainMenuAmbiance: 0
   mainMenuTrack: {fileID: 11400000, guid: 01b83dda49b893d4ab2b804aa2bd1671, type: 2}
 --- !u!1 &910174215
