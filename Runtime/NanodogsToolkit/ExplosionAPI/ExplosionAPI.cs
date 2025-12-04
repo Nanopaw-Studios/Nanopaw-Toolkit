@@ -46,13 +46,22 @@ namespace Nanodogs.API.Explosion
                     rb.useGravity = settings.useGravity;
                 }
 
-                if(hit.CompareTag("Fracturer"))
+                if (hit.CompareTag("Fracturer"))
                 {
-                    Fracture frac = hit.GetComponent<Fracture>();
-                    frac.CauseFracture();
+                    // Look on this object first, then its parents (handles collider-on-child, script-on-parent setups)
+                    Fracture frac = hit.GetComponent<Fracture>() ?? hit.GetComponentInParent<Fracture>();
+
+                    if (frac != null)
+                    {
+                        frac.CauseFracture();
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"Explosion hit object tagged 'Fracturer' but with no Fracture component: {hit.name}", hit);
+                    }
                 }
 
-                // Apply damage to objects with a Health component
+                // TODO: Apply damage to objects with a Health component
                 // add this!!!!
             }
             return null; // Return null or any relevant information if needed
