@@ -32,16 +32,7 @@ namespace Nanodogs.Skyrooms
 
             EditorGUI.BeginChangeCheck();
 
-#if UNITY_EDITOR
-            settings.skyboxScene.sceneAsset =
-                (SceneAsset)EditorGUILayout.ObjectField("Skybox Scene",
-                    settings.skyboxScene.sceneAsset,
-                    typeof(SceneAsset),
-                    false);
-
-            if (settings.skyboxScene.sceneAsset != null)
-                settings.skyboxScene.UpdateSceneName();
-#endif
+            settings.skyboxSceneName = EditorGUILayout.TextField("Scene Name", settings.skyboxSceneName);
 
             settings.scale = EditorGUILayout.FloatField("Scale", settings.scale);
             settings.offset = EditorGUILayout.Vector3Field("Offset", settings.offset);
@@ -69,7 +60,8 @@ namespace Nanodogs.Skyrooms
                     else
                     {
                         // Editor mode preview
-                        var scenePath = AssetDatabase.GetAssetPath(settings.skyboxScene.sceneAsset);
+                        var scene = UnityEditor.SceneManagement.EditorSceneManager.GetSceneByName(settings.skyboxSceneName);
+                        var scenePath = scene.path;
                         loadedScene = EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Additive);
 
                         foreach (GameObject go in loadedScene.GetRootGameObjects())
