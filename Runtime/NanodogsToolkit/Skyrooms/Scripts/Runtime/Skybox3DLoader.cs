@@ -35,7 +35,7 @@ namespace Nanodogs.Skyrooms
 
         public static void LoadSkybox(Skybox3DSettings s)
         {
-            if (string.IsNullOrEmpty(s.skyboxScene.sceneName))
+            if (string.IsNullOrEmpty(s.skyboxSceneName))
             {
                 Debug.LogError("No scene name.");
                 return;
@@ -68,10 +68,10 @@ namespace Nanodogs.Skyrooms
             }
 
             // load the skybox scene additively
-            var async = SceneManager.LoadSceneAsync(s.skyboxScene.sceneName, LoadSceneMode.Additive);
+            var async = SceneManager.LoadSceneAsync(s.skyboxSceneName, LoadSceneMode.Additive);
             async.completed += _ =>
             {
-                Scene loadedScene = SceneManager.GetSceneByName(s.skyboxScene.sceneName);
+                Scene loadedScene = SceneManager.GetSceneByName(s.skyboxSceneName);
                 if (loadedScene.isLoaded)
                 {
                     foreach (GameObject go in loadedScene.GetRootGameObjects())
