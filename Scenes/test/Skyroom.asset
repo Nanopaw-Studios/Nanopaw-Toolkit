@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Skyroom
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::Nanodogs.Skyrooms.Skybox3DSettings
   skyboxScene:
-    sceneAsset: {fileID: 102900000, guid: f2ff939933f95004e8ce5dab5474d199, type: 3}
-    sceneName: Sky
+    sceneAsset: {fileID: 102900000, guid: cc5e1f4b7d209014b9dcf7d75f5bc543, type: 3}
+    sceneName: test 1
   scale: 5
   offset: {x: 0, y: -60, z: 0}

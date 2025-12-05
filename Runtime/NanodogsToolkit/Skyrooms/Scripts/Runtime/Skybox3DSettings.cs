@@ -10,22 +10,4 @@ namespace Nanodogs.Skyrooms
         public float scale = 1f;
         public Vector3 offset = Vector3.zero;
     }
-
-    #if UNITY_EDITOR
-    [System.Serializable]
-    public class SkyboxSceneReference
-    {
-        public SceneAsset sceneAsset;
-        public string sceneName;
-
-        public void UpdateSceneName()
-        {
-            if (sceneAsset != null)
-            {
-                sceneName = sceneAsset.name;
-            }
-        }
-    }
-
-    #endif
 }
