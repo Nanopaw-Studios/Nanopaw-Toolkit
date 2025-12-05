@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 namespace Nanodogs.Skyrooms
@@ -10,10 +11,11 @@ namespace Nanodogs.Skyrooms
         public Vector3 offset = Vector3.zero;
     }
 
+    #if UNITY_EDITOR
     [System.Serializable]
     public class SkyboxSceneReference
     {
-        public UnityEditor.SceneAsset sceneAsset;
+        public SceneAsset sceneAsset;
         public string sceneName;
 
         public void UpdateSceneName()
@@ -24,4 +26,6 @@ namespace Nanodogs.Skyrooms
             }
         }
     }
+
+    #endif
 }
