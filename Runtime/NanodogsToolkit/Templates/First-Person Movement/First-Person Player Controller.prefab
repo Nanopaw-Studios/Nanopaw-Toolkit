@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 6939925807832477495}
   - component: {fileID: 4372157008490153262}
   - component: {fileID: -6456593012921064906}
+  - component: {fileID: 2003898416519165990}
   - component: {fileID: 2975202628466790550}
   - component: {fileID: 7904011625370299997}
   m_Layer: 0
@@ -213,6 +214,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   cameraTransform: {fileID: 6571762992440134370}
   playerBodyTransform: {fileID: 2759690086907853745}
+--- !u!114 &2003898416519165990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6551193978815046358}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0083e31970a362d4181f48622db5a897, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Nanodogs.Tooklit::NanoInventoryManager
+  inventory: []
+  maxInventorySize: 5
+  equipped: {fileID: 0}
+  InventorySlotPrefab: {fileID: 4367925828372572674, guid: f565ebdd3c9c93d42ab3628610c1b7fd, type: 3}
 --- !u!114 &2975202628466790550
 MonoBehaviour:
   m_ObjectHideFlags: 0
