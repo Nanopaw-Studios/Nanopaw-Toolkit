@@ -31,10 +31,15 @@ public class NanoInventoryManager : MonoBehaviour
             // Populate the inventory UI with slots
             for (int i = 0; i < maxInventorySize; i++)
             {
+                // empty slots initially
                 GameObject slot = Instantiate(InventorySlotPrefab, InventoryUI.transform);
-                slot.GetComponent<NanoItemHolder>().item = inventory[i];
-
                 slot.transform.Find("Num").gameObject.GetComponent<TMP_Text>().text = i.ToString();
+
+                // then if there is an item in that slot, assign it
+                if (slot.GetComponent<NanoItemHolder>().item != null)
+                {
+                    slot.GetComponent<NanoItemHolder>().item = inventory[i];
+                }
             }
         }
     }
