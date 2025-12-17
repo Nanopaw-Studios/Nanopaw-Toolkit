@@ -25,7 +25,7 @@ namespace Nanodogs.UniversalScripts
 
             Debug.Log($"{gameObject.name} got interacted with!");
             onInteract?.Invoke();
-            SetInteractable(false);
+            //SetInteractable(false); ??
         }
 
         public void SetInteractable(bool value)
