@@ -1,47 +1,134 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 public class NanoInventoryManager : MonoBehaviour
 {
+    [Header("Data")]
     public List<NanoItem> inventory = new List<NanoItem>();
     public int maxInventorySize = 20;
-
     public NanoItem equipped;
 
-    private GameObject InventoryUI;
-    public GameObject InventorySlotPrefab;
+    [Header("UI")]
+    [SerializeField] private Transform inventoryUI;           // assign in inspector (Canvas/Inventory)
+    [SerializeField] private GameObject inventorySlotPrefab;  // assign in inspector
+
+    private readonly List<NanoItemHolder> slots = new();
+
+    private void Awake()
+    {
+        // Fallback if you didn't assign it
+        if (inventoryUI == null)
+        {
+            var go = GameObject.Find("Canvas/Inventory");
+            if (go) inventoryUI = go.transform;
+        }
+
+        if (inventoryUI == null)
+            Debug.LogError("Inventory UI not found. Assign inventoryUI or ensure Canvas/Inventory exists.", this);
+
+        if (inventorySlotPrefab == null)
+            Debug.LogError("InventorySlotPrefab not assigned.", this);
+    }
 
     private void Start()
     {
-        // this will be true anyway, but just in case
-        if (InventoryUI == null)
-        {
-            InventoryUI = GameObject.Find("Canvas/Inventory");
-        }
-        // if still null, log an error
-        if (InventoryUI == null)
-        {
-            Debug.LogError("Inventory UI not found in the scene. Please ensure there is a Canvas with an Inventory GameObject.");
-        }
+        BuildSlots();
+        RefreshUI();
+    }
 
-        if (InventoryUI != null && InventorySlotPrefab != null)
+    private void BuildSlots()
+    {
+        if (inventoryUI == null || inventorySlotPrefab == null) return;
+
+        // optional: clear existing children if you re-enter playmode and duplicates happen
+        // for (int i = inventoryUI.childCount - 1; i >= 0; i--) Destroy(inventoryUI.GetChild(i).gameObject);
+
+        slots.Clear();
+
+        for (int i = 0; i < maxInventorySize; i++)
         {
-            // Populate the inventory UI with slots
-            for (int i = 0; i < maxInventorySize; i++)
+            GameObject slotGO = Instantiate(inventorySlotPrefab, inventoryUI);
+            slotGO.name = $"Slot_{i}";
+
+            var num = slotGO.transform.Find("Num");
+            if (num)
             {
-                // empty slots initially
-                GameObject slot = Instantiate(InventorySlotPrefab, InventoryUI.transform);
-                slot.transform.Find("Num").gameObject.GetComponent<TMP_Text>().text = i.ToString();
-
-                // then if there is an item in that slot, assign it
-                if (slot.GetComponent<NanoItemHolder>().item != null)
-                {
-                    slot.GetComponent<NanoItemHolder>().item = inventory[i];
-                }
+                var tmp = num.GetComponent<TMP_Text>();
+                if (tmp) tmp.text = (i + 1).ToString(); // or i.ToString() if you want 0-based
             }
+
+            var holder = slotGO.GetComponent<NanoItemHolder>();
+            if (holder == null)
+                Debug.LogError($"InventorySlotPrefab is missing NanoItemHolder component.", slotGO);
+            else
+                slots.Add(holder);
         }
+    }
+
+    private void RefreshUI()
+    {
+        // Fill slots based on current inventory
+        for (int i = 0; i < slots.Count; i++)
+        {
+            NanoItem item = (i < inventory.Count) ? inventory[i] : null;
+
+            slots[i].item = item;
+
+            // If your holder has a method to update icon/text, call it here:
+            // slots[i].Refresh();
+        }
+    }
+
+    public void AddItem(NanoItem item)
+    {
+        if (item == null) return;
+
+        if (inventory.Count >= maxInventorySize)
+        {
+            Debug.LogWarning("Inventory is full. Cannot add more items.");
+            return;
+        }
+
+        inventory.Add(item);
+        Debug.Log($"Added item: {item.itemName}");
+
+        RefreshUI();
+    }
+
+    public void RemoveItem(NanoItem item)
+    {
+        if (item == null) return;
+
+        if (inventory.Contains(item))
+        {
+            if (equipped == item) UnequipItem();
+
+            inventory.Remove(item);
+            Debug.Log($"Removed item: {item.itemName}");
+
+            RefreshUI();
+        }
+        else
+        {
+            Debug.LogWarning($"Item not found in inventory: {item.itemName}");
+        }
+    }
+
+    public void ClearInventory()
+    {
+        inventory.Clear();
+        equipped = null;
+        RefreshUI();
+        Debug.Log("Inventory cleared.");
+    }
+
+    public void SortInventoryByName()
+    {
+        inventory.Sort((a, b) => a.itemName.CompareTo(b.itemName));
+        RefreshUI();
+        Debug.Log("Inventory sorted by item name.");
     }
 
     public void EquipItem(NanoItem item)
@@ -67,120 +154,6 @@ public class NanoInventoryManager : MonoBehaviour
         else
         {
             Debug.LogWarning("No item is currently equipped.");
-        }
-    }
-
-    public void AddItem(NanoItem item)
-    {
-        if (inventory.Count >= maxInventorySize)
-        {
-            Debug.LogWarning("Inventory is full. Cannot add more items.");
-            return;
-        }
-
-        inventory.Add(item);
-        Debug.Log($"Added item: {item.itemName}");
-    }
-
-    public void RemoveItem(NanoItem item)
-    {
-        if (inventory.Contains(item))
-        {
-            if (equipped == item)
-                UnequipItem();
-
-            inventory.Remove(item);
-            Debug.Log($"Removed item: {item.itemName}");
-        }
-        else
-        {
-            Debug.LogWarning($"Item not found in inventory: {item.itemName}");
-        }
-    }
-
-    public void UseItem(NanoItem item)
-    {
-        // Ensure the item is equipped before use
-        if (equipped != item)
-            return;
-
-        if (inventory.Contains(item))
-        {
-            item.Use();
-            RemoveItem(item);
-        }
-        else
-        {
-            Debug.LogWarning($"Item not found in inventory: {item.itemName}");
-        }
-    }
-
-    public void ListInventory()
-    {
-        Debug.Log("Current Inventory:");
-        foreach (var item in inventory)
-        {
-            Debug.Log($"- {item.itemName}");
-        }
-    }
-
-    public void ClearInventory()
-    {
-        inventory.Clear();
-        equipped = null;
-        Debug.Log("Inventory cleared.");
-    }
-
-    public bool IsInventoryFull()
-    {
-        return inventory.Count >= maxInventorySize;
-    }
-
-    public int GetInventoryCount()
-    {
-        return inventory.Count;
-    }
-
-    public bool HasItem(NanoItem item)
-    {
-        return inventory.Contains(item);
-    }
-
-    public void SortInventoryByName()
-    {
-        inventory.Sort((item1, item2) => item1.itemName.CompareTo(item2.itemName));
-        Debug.Log("Inventory sorted by item name.");
-    }
-
-    public void SortInventoryByType<T>() where T : NanoItem
-    {
-        inventory.Sort((item1, item2) =>
-        {
-            bool isItem1OfType = item1 is T;
-            bool isItem2OfType = item2 is T;
-            if (isItem1OfType && !isItem2OfType) return -1;
-            if (!isItem1OfType && isItem2OfType) return 1;
-            return 0;
-        });
-        Debug.Log($"Inventory sorted by type: {typeof(T).Name}");
-    }
-
-    public void TransferItemToInventory(NanoItem item, NanoInventoryManager targetInventory)
-    {
-        if (inventory.Contains(item))
-        {
-            if (targetInventory.IsInventoryFull())
-            {
-                Debug.LogWarning("Target inventory is full. Cannot transfer item.");
-                return;
-            }
-            RemoveItem(item);
-            targetInventory.AddItem(item);
-            Debug.Log($"Transferred item: {item.itemName} to target inventory.");
-        }
-        else
-        {
-            Debug.LogWarning($"Item not found in inventory: {item.itemName}");
         }
     }
 }

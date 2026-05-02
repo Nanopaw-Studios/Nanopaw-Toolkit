@@ -229,7 +229,14 @@ MonoBehaviour:
   inventory: []
   maxInventorySize: 5
   equipped: {fileID: 0}
-  InventorySlotPrefab: {fileID: 4367925828372572674, guid: f565ebdd3c9c93d42ab3628610c1b7fd, type: 3}
+  inventoryUI: {fileID: 0}
+  inventorySlotPrefab: {fileID: 4367925828372572674, guid: f565ebdd3c9c93d42ab3628610c1b7fd, type: 3}
+  keys:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!114 &2975202628466790550
 MonoBehaviour:
   m_ObjectHideFlags: 0
