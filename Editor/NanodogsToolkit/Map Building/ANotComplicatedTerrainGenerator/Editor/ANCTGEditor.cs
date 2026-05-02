@@ -13,86 +13,87 @@ namespace Nanodogs.Toolkit.MapBuilding
         // ─────────────────────────────────────────────────────────────────────────────
         // SECTION FOLDOUTS
         // ─────────────────────────────────────────────────────────────────────────────
-        private bool showManualSection       = true;
-        private bool showProceduralSection   = false;
-        private bool showObjectSection       = true;
-        private bool showAdvancedObjSettings = false;
+        [SerializeField] private bool showManualSection       = true;
+        [SerializeField] private bool showProceduralSection   = false;
+        [SerializeField] private bool showObjectSection       = true;
+        [SerializeField] private bool showAdvancedObjSettings = false;
 
         // ─────────────────────────────────────────────────────────────────────────────
         // SHARED TERRAIN SETTINGS
         // ─────────────────────────────────────────────────────────────────────────────
-        private float terrainHeightMultiplier = 50f;
-        private int   terrainWidth            = 513;
-        private int   terrainLength           = 513;
+        [SerializeField] private float terrainHeightMultiplier = 50f;
+        [SerializeField] private int   terrainWidth            = 513;
+        [SerializeField] private int   terrainLength           = 513;
 
         // ─────────────────────────────────────────────────────────────────────────────
         // MANUAL (TEXTURE-BASED) SETTINGS
         // ─────────────────────────────────────────────────────────────────────────────
-        private Texture2D heightMap;
-        private Texture2D splatMap;
+        [SerializeField] private Texture2D heightMap;
+        [SerializeField] private Texture2D splatMap;
 
         // ─────────────────────────────────────────────────────────────────────────────
         // PROCEDURAL NOISE SETTINGS
         // ─────────────────────────────────────────────────────────────────────────────
-        private int     noiseSeed       = 42;
-        private float   noiseScale      = 80f;
-        private int     noiseOctaves    = 4;
-        private float   noisePersistence = 0.5f;
-        private float   noiseLacunarity = 2.0f;
-        private Vector2 noiseOffset     = Vector2.zero;
+        [SerializeField] private int     noiseSeed       = 42;
+        [SerializeField] private float   noiseScale      = 80f;
+        [SerializeField] private int     noiseOctaves    = 4;
+        [SerializeField] private float   noisePersistence = 0.5f;
+        [SerializeField] private float   noiseLacunarity = 2.0f;
+        [SerializeField] private Vector2 noiseOffset     = Vector2.zero;
 
         // ─────────────────────────────────────────────────────────────────────────────
         // STEPPED / TERRACED TERRAIN
         // ─────────────────────────────────────────────────────────────────────────────
-        private bool  useSteppedTerrain = false;
-        private int   stepCount         = 6;
-        private float stepSmoothness    = 0f;   // 0 = hard steps, 1 = fully smooth
+        [SerializeField] private bool  useSteppedTerrain = false;
+        [SerializeField] private int   stepCount         = 6;
+        [SerializeField] private float stepSmoothness    = 0f;   // 0 = hard steps, 1 = fully smooth
 
         // ─────────────────────────────────────────────────────────────────────────────
         // FALLOFF MAP (ISLAND MODE)
         // ─────────────────────────────────────────────────────────────────────────────
-        private bool  useFalloffMap   = false;
-        private float falloffStrength = 3.0f;   // controls how aggressively edges fall
-        private float falloffShift    = 2.2f;   // controls how far island land extends
+        [SerializeField] private bool  useFalloffMap   = false;
+        [SerializeField] private float falloffStrength = 3.0f;   // controls how aggressively edges fall
+        [SerializeField] private float falloffShift    = 2.2f;   // controls how far island land extends
+        [SerializeField] private bool invertFalloffMap = false;
 
         // ─────────────────────────────────────────────────────────────────────────────
         // PROCEDURAL SPLAT MAP ZONES (height thresholds)
         // ─────────────────────────────────────────────────────────────────────────────
-        private float waterHeightThreshold = 0.28f;
-        private float grassHeightThreshold = 0.62f;
+        [SerializeField] private float waterHeightThreshold = 0.28f;
+        [SerializeField] private float grassHeightThreshold = 0.62f;
         // Anything above grassHeightThreshold maps to rockColor
 
         // ─────────────────────────────────────────────────────────────────────────────
         // PREVIEW
         // ─────────────────────────────────────────────────────────────────────────────
-        private bool      showPreview            = true;
-        private Texture2D proceduralHeightPreview;
-        private Texture2D proceduralSplatPreview;
-        private const int PreviewSize            = 150;
+        [SerializeField] private bool showPreview = true;
+        [SerializeField] private Texture2D proceduralHeightPreview;
+        [SerializeField] private Texture2D proceduralSplatPreview;
+        [SerializeField] private const int PreviewSize = 150;
 
         // ─────────────────────────────────────────────────────────────────────────────
         // OBJECT PLACEMENT – PREFABS & COLORS
         // ─────────────────────────────────────────────────────────────────────────────
-        private GameObject treePrefab;
-        private GameObject rockPrefab;
-        private GameObject waterPrefab;
+        [SerializeField] private GameObject treePrefab;
+        [SerializeField] private GameObject rockPrefab;
+        [SerializeField] private GameObject waterPrefab;
 
-        private Color treeColor  = Color.green;
-        private Color rockColor  = Color.gray;
-        private Color waterColor = Color.blue;
+        [SerializeField] private Color treeColor  = Color.green;
+        [SerializeField] private Color rockColor  = Color.gray;
+        [SerializeField] private Color waterColor = Color.blue;
 
-        private float objectPlacementThreshold = 0.1f;
-        private float placementDensity         = 1.0f;
+        [SerializeField] private float objectPlacementThreshold = 0.1f;
+        [SerializeField] private float placementDensity         = 1.0f;
 
         // ─────────────────────────────────────────────────────────────────────────────
         // OBJECT PLACEMENT – ADVANCED
         // ─────────────────────────────────────────────────────────────────────────────
-        private float minPlacementSlope = 0f;
-        private float maxPlacementSlope = 35f;
-        private bool  randomScaleObjects = false;
-        private float minObjectScale    = 0.8f;
-        private float maxObjectScale    = 1.2f;
-        private bool  alignToNormal     = false;
+        [SerializeField] private float minPlacementSlope = 0f;
+        [SerializeField] private float maxPlacementSlope = 35f;
+        [SerializeField] private bool  randomScaleObjects = false;
+        [SerializeField] private float minObjectScale    = 0.8f;
+        [SerializeField] private float maxObjectScale    = 1.2f;
+        [SerializeField] private bool  alignToNormal     = false;
 
         // ─────────────────────────────────────────────────────────────────────────────
         // RUNTIME STATE
@@ -247,51 +248,59 @@ namespace Nanodogs.Toolkit.MapBuilding
 
             GUILayout.Space(8);
 
-            // ── Stepped Terrain ──
+            // ── Stepped / Terraced Terrain ──
             GUILayout.Label("Stepped / Terraced", EditorStyles.boldLabel);
-            EditorGUI.BeginChangeCheck();
-            bool  tempUseStepped = EditorGUILayout.Toggle("Enable Stepped Terrain", useSteppedTerrain);
-            int tempStepCount = tempUseStepped
-                ? EditorGUILayout.IntSlider("Step Count", stepCount, 2, 20)
-                : stepCount;
 
-            float tempStepSmooth = tempUseStepped
-                ? EditorGUILayout.Slider("Step Smoothness", stepSmoothness, 0f, 1f)
-                : stepSmoothness;
-            if (useSteppedTerrain)
-                EditorGUILayout.HelpBox("Smoothness 0 = hard terracing · 1 = blend back to smooth noise.", MessageType.None);
+            EditorGUI.BeginChangeCheck();
+            bool tempUseStepped = EditorGUILayout.Toggle("Enable Stepped Terrain", useSteppedTerrain);
             if (EditorGUI.EndChangeCheck())
             {
                 useSteppedTerrain = tempUseStepped;
-                stepCount         = tempStepCount;
-                stepSmoothness    = tempStepSmooth;
                 RunFastPreview();
+            }
+
+            if (useSteppedTerrain)
+            {
+                EditorGUI.BeginChangeCheck();
+                int tempStepCount = EditorGUILayout.IntSlider("Step Count", stepCount, 2, 20);
+                float tempStepSmooth = EditorGUILayout.Slider("Step Smoothness", stepSmoothness, 0f, 1f);
+                if (EditorGUI.EndChangeCheck())
+                {
+                    stepCount = tempStepCount;
+                    stepSmoothness = tempStepSmooth;
+                    RunFastPreview();
+                }
+                EditorGUILayout.HelpBox("Smoothness 0 = hard terracing · 1 = blend back to smooth noise.", MessageType.None);
             }
 
             GUILayout.Space(8);
 
             // ── Falloff / Island ──
             GUILayout.Label("Island Falloff", EditorStyles.boldLabel);
-            EditorGUI.BeginChangeCheck();
-            bool  tempUseFalloff = EditorGUILayout.Toggle("Enable Falloff Map", useFalloffMap);
-            float tempFallStr = tempUseFalloff
-                ? EditorGUILayout.Slider("Falloff Strength", falloffStrength, 1f, 10f)
-                : falloffStrength;
 
-            float tempFallShift = tempUseFalloff
-                ? EditorGUILayout.Slider("Falloff Shift", falloffShift, 0f, 5f)
-                : falloffShift;
-            if (useFalloffMap)
-                EditorGUILayout.HelpBox(
-                    "Strength controls edge aggressiveness.\n" +
-                    "Shift controls how far the island land extends from centre.",
-                    MessageType.None);
+            EditorGUI.BeginChangeCheck();
+            bool tempUseFalloff = EditorGUILayout.Toggle("Enable Falloff Map", useFalloffMap);
             if (EditorGUI.EndChangeCheck())
             {
-                useFalloffMap   = tempUseFalloff;
-                falloffStrength = tempFallStr;
-                falloffShift    = tempFallShift;
+                useFalloffMap = tempUseFalloff;
                 RunFastPreview();
+            }
+
+            if (useFalloffMap)
+            {
+                EditorGUI.BeginChangeCheck();
+                float tempFallStr = EditorGUILayout.Slider("Falloff Strength", falloffStrength, 1f, 10f);
+                float tempFallShift = EditorGUILayout.Slider("Falloff Shift", falloffShift, 0f, 5f);
+                bool tempInvert = EditorGUILayout.Toggle("Invert Falloff", invertFalloffMap);
+
+                if (EditorGUI.EndChangeCheck())
+                {
+                    falloffStrength = tempFallStr;
+                    falloffShift = tempFallShift;
+                    invertFalloffMap = tempInvert;
+                    RunFastPreview();
+                }
+                EditorGUILayout.HelpBox("Strength controls edge aggressiveness.\nShift controls how far the island land extends from centre.", MessageType.None);
             }
 
             GUILayout.Space(8);
@@ -550,10 +559,13 @@ namespace Nanodogs.Toolkit.MapBuilding
         /// </summary>
         private void RunProceduralGeneration()
         {
+            Debug.Log($"[DEBUG] Before generation - Scale: {noiseScale} | Lacunarity: {noiseLacunarity} | Seed: {noiseSeed}");
             int w = terrainWidth;
             int h = terrainLength;
 
             generatedHeights = ComputeHeightData(w, h);
+
+            Debug.Log($"[DEBUG] After ComputeHeightData - Scale: {noiseScale} | Lacunarity: {noiseLacunarity}");
 
             // Rebuild preview textures sampled down from full-res data
             proceduralHeightPreview = new Texture2D(PreviewSize, PreviewSize, TextureFormat.RGB24, false);
@@ -606,8 +618,11 @@ namespace Nanodogs.Toolkit.MapBuilding
 
                     for (int oct = 0; oct < noiseOctaves; oct++)
                     {
-                        float sx = (x + octaveOffsets[oct].x) / noiseScale * frequency;
-                        float sy = (y + octaveOffsets[oct].y) / noiseScale * frequency;
+                        float sampleX = (x / (float)(w - 1)) * (terrainWidth - 1);
+                        float sampleY = (y / (float)(h - 1)) * (terrainLength - 1);
+
+                        float sx = (sampleX + octaveOffsets[oct].x) / noiseScale * frequency;
+                        float sy = (sampleY + octaveOffsets[oct].y) / noiseScale * frequency;
                         noiseValue += (Mathf.PerlinNoise(sx, sy) * 2f - 1f) * amplitude;
                         amplitude *= noisePersistence;
                         frequency *= noiseLacunarity;
@@ -646,20 +661,25 @@ namespace Nanodogs.Toolkit.MapBuilding
         private float[,] BuildFalloffMap(int w, int h)
         {
             float[,] map = new float[h, w];
+
             for (int y = 0; y < h; y++)
             {
                 for (int x = 0; x < w; x++)
                 {
-                    // Map pixel coords to [-1, 1]
-                    float nx = x / (float)w * 2f - 1f;
-                    float ny = y / (float)h * 2f - 1f;
+                    float nx = x / (float)(w - 1) * 2f - 1f;
+                    float ny = y / (float)(h - 1) * 2f - 1f;
 
-                    // Square falloff: take the larger axis distance (makes a square island)
                     float v = Mathf.Max(Mathf.Abs(nx), Mathf.Abs(ny));
 
-                    map[y, x] = EvaluateFalloffCurve(v);
+                    float falloff = EvaluateFalloffCurve(v);
+
+                    if (invertFalloffMap)
+                        falloff = 1f - falloff;
+
+                    map[y, x] = falloff;
                 }
             }
+
             return map;
         }
 
