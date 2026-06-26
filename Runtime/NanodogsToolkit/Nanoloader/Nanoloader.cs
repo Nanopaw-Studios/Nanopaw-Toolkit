@@ -1,4 +1,4 @@
-// © 2025 Nanodogs Studios. All rights reserved.
+// Â© 2025 Nanodogs Studios. All rights reserved.
 
 using Nanodogs.UniversalScripts;
 using UnityEngine;
@@ -26,7 +26,7 @@ public class Nanoloader : MonoBehaviour
             if (pl.Length > 1)
             {
                 Debug.Log("Multiple players found, removing duplicates.");
-                if (pl[0].GetInstanceID() != player.GetInstanceID())
+                if (pl[0] != player)
                 {
                     Destroy(pl[0]);
                 }
