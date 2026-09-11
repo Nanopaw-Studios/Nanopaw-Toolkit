@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 namespace Nanodogs.UniversalScripts
 {
     /// <summary>
-    /// Advanced first-person player camera with smooth look controls, dual-harmonic movement bobbing,
+    /// Advanced first-person player camera with smooth look controls, realistic grounded movement bobbing,
     /// natural idle breathing sway, strafe banking, landing/jump recoil, and dynamic FOV sprint kick.
     /// </summary>
     public class FirstPersonPlayerCamera : MonoBehaviour
@@ -30,11 +30,11 @@ namespace Nanodogs.UniversalScripts
         [Header("Head Bob Settings")]
         [Tooltip("Enables head bobbing while moving.")]
         public bool enableHeadBob = true;
-        [Tooltip("Frequency of footstep bob cycles.")]
-        public float bobFrequency = 2.0f;
-        [Tooltip("Overall displacement amplitude for head bobbing.")]
-        public float bobAmplitude = 0.05f;
-        [Tooltip("Speed at which head bobbing fades in and out.")]
+        [Tooltip("Base footstep cadence frequency (approx 1.8 - 2.0 steps per second for natural walking).")]
+        public float bobFrequency = 1.9f;
+        [Tooltip("Base displacement amplitude parameter.")]
+        public float bobAmplitude = 0.18f;
+        [Tooltip("Speed at which head bobbing fades in and out when starting and stopping.")]
         public float bobFadeSpeed = 8f;
         [Tooltip("Minimum movement input magnitude required to start bobbing.")]
         public float bobStartThreshold = 0.1f;
@@ -43,59 +43,62 @@ namespace Nanodogs.UniversalScripts
         [Tooltip("Optional custom curve for vertical bob (evaluated if procedural harmonics disabled).")]
         public AnimationCurve bobCurveY;
 
-        [Header("Head Bob Polish")]
+        [Header("Head Bob Polish & Tuning")]
         [Tooltip("If true, uses smooth procedural Lissajous harmonic curves with rotational tilting. If false, evaluates bobCurveX/Y.")]
         public bool useProceduralHarmonics = true;
-        [Tooltip("Multiplier for horizontal lateral bobbing sway.")]
-        [Range(0f, 2f)]
-        public float bobHorizontalMultiplier = 0.6f;
+        [Tooltip("Master position scaling factor to convert bob amplitude into realistic displacement in meters.")]
+        [Range(0.01f, 0.4f)]
+        public float bobPositionScale = 0.10f;
+        [Tooltip("Multiplier for horizontal lateral sway (keeps sway narrow and athletic).")]
+        [Range(0f, 1f)]
+        public float bobHorizontalMultiplier = 0.35f;
         [Tooltip("Multiplier for vertical bobbing dip.")]
-        [Range(0f, 2f)]
-        public float bobVerticalMultiplier = 1.0f;
+        [Range(0f, 1f)]
+        public float bobVerticalMultiplier = 0.65f;
         [Tooltip("Subtle camera roll tilt while stepping (degrees).")]
-        [Range(0f, 5f)]
-        public float bobRollAmplitude = 1.2f;
+        [Range(0f, 2f)]
+        public float bobRollAmplitude = 0.45f;
         [Tooltip("Subtle camera pitch nod on footstep impact (degrees).")]
-        [Range(0f, 5f)]
-        public float bobPitchAmplitude = 0.6f;
-        [Tooltip("Dynamically scales bob frequency with the player's movement speed.")]
+        [Range(0f, 2f)]
+        public float bobPitchAmplitude = 0.22f;
+        [Tooltip("Dynamically scales bob cadence with the player's actual movement speed.")]
         public bool scaleBobWithSpeed = true;
 
         [Header("Idle Camera Movement (Breathing Sway)")]
         [Tooltip("Enables subtle breathing and organic camera sway when standing still.")]
         public bool enableIdleMovement = true;
-        [Tooltip("Frequency of the idle breathing cycle.")]
-        public float idleBobFrequency = 1.2f;
-        [Tooltip("Translational amplitude of idle breathing.")]
-        public float idleBobPositionAmplitude = 0.012f;
+        [Tooltip("Frequency of the idle breathing cycle (approx 1.0 - 1.2 for natural human resting respiration).")]
+        public float idleBobFrequency = 1.1f;
+        [Tooltip("Translational amplitude of idle breathing in meters.")]
+        public float idleBobPositionAmplitude = 0.005f;
         [Tooltip("Rotational amplitude of idle breathing in degrees (pitch and roll).")]
-        public float idleBobRotationAmplitude = 0.35f;
+        public float idleBobRotationAmplitude = 0.20f;
         [Tooltip("Speed at which idle sway blends in when stopping and out when moving.")]
-        public float idleFadeSpeed = 4f;
+        public float idleFadeSpeed = 3.5f;
 
         [Header("Dynamic Strafe Banking & Look Sway")]
         [Tooltip("Tilts the camera roll slightly when strafing left or right.")]
         public bool enableStrafeTilt = true;
         [Tooltip("Maximum roll angle when strafing (degrees).")]
-        [Range(0f, 5f)]
-        public float strafeTiltAngle = 1.6f;
+        [Range(0f, 3f)]
+        public float strafeTiltAngle = 1.0f;
         [Tooltip("Speed of strafe tilt response.")]
         public float strafeTiltSpeed = 8f;
 
         [Tooltip("Slight camera roll banking when turning the mouse quickly.")]
         public bool enableLookBanking = true;
         [Tooltip("Amount of roll banking applied during mouse rotation.")]
-        public float lookBankingStrength = 0.015f;
+        public float lookBankingStrength = 0.008f;
         [Tooltip("Maximum roll angle from rapid mouse turning.")]
-        public float maxLookBankingAngle = 2.0f;
+        public float maxLookBankingAngle = 1.2f;
 
         [Header("Landing & Jump Recoil")]
         [Tooltip("Enables camera dip and pitch recoil when landing from a fall.")]
         public bool enableLandingBob = true;
         [Tooltip("Vertical downward displacement on landing.")]
-        public float landingBobAmount = 0.08f;
+        public float landingBobAmount = 0.06f;
         [Tooltip("Downward pitch nod angle on landing (degrees).")]
-        public float landingPitchAmount = 2.0f;
+        public float landingPitchAmount = 1.5f;
         [Tooltip("Speed of landing compression.")]
         public float landingBobSpeed = 12f;
         [Tooltip("Speed of return after landing.")]
@@ -106,17 +109,17 @@ namespace Nanodogs.UniversalScripts
         [Tooltip("Enables subtle camera kick when jumping.")]
         public bool enableJumpRecoil = true;
         [Tooltip("Positional recoil displacement when jumping.")]
-        public float jumpRecoilPosition = 0.025f;
+        public float jumpRecoilPosition = 0.02f;
         [Tooltip("Pitch recoil nod when jumping (degrees).")]
-        public float jumpRecoilPitch = 1.0f;
+        public float jumpRecoilPitch = 0.8f;
 
         [Header("Dynamic FOV Sprint Kick")]
         [Tooltip("Subtly expands the camera FOV while sprinting.")]
         public bool enableFovKick = true;
         [Tooltip("Extra degrees of FOV added while sprinting.")]
-        public float sprintFovOffset = 6f;
+        public float sprintFovOffset = 5f;
         [Tooltip("Speed of FOV expansion and recovery.")]
-        public float fovTransitionSpeed = 8f;
+        public float fovTransitionSpeed = 7f;
 
         [Header("References & Ground Check")]
         [Tooltip("Rigidbody of the player character.")]
@@ -268,8 +271,8 @@ namespace Nanodogs.UniversalScripts
             if (!enableHeadBob || moveAction == null)
             {
                 bobWeight = Mathf.MoveTowards(bobWeight, 0f, bobFadeSpeed * Time.deltaTime);
-                currentBobPosOffset = Vector3.zero;
-                currentBobRotOffset = Vector3.zero;
+                currentBobPosOffset = Vector3.Lerp(currentBobPosOffset, Vector3.zero, Time.deltaTime * bobFadeSpeed);
+                currentBobRotOffset = Vector3.Lerp(currentBobRotOffset, Vector3.zero, Time.deltaTime * bobFadeSpeed);
                 return;
             }
 
@@ -277,14 +280,14 @@ namespace Nanodogs.UniversalScripts
             bool hasInput = moveInput.magnitude > bobStartThreshold;
             bool isGrounded = IsGrounded();
 
-            // Check actual movement velocity if rigidbody is present
+            // Check actual horizontal velocity
             bool isActuallyMoving = true;
             float currentSpeed = 0f;
             if (playerRigidbody != null)
             {
                 Vector3 horizontalVel = new Vector3(playerRigidbody.linearVelocity.x, 0f, playerRigidbody.linearVelocity.z);
                 currentSpeed = horizontalVel.magnitude;
-                isActuallyMoving = currentSpeed > 0.15f;
+                isActuallyMoving = currentSpeed > 0.12f;
             }
 
             bool shouldBob = isGrounded && hasInput && isActuallyMoving;
@@ -293,30 +296,46 @@ namespace Nanodogs.UniversalScripts
 
             if (bobWeight > 0.0001f)
             {
-                // Scale frequency dynamically with speed
+                // Dynamic cadence: 1 full stride = 2 footsteps
                 float baseSpeed = (playerMovement != null && playerMovement.speed > 0.1f) ? playerMovement.speed : 5f;
-                float speedMultiplier = scaleBobWithSpeed ? Mathf.Clamp(currentSpeed / baseSpeed, 0.6f, 2.0f) : 1f;
+                float speedRatio = (playerRigidbody != null && baseSpeed > 0.1f) ? (currentSpeed / baseSpeed) : 1f;
+                float speedMultiplier = scaleBobWithSpeed ? Mathf.Clamp(speedRatio, 0.7f, 1.6f) : 1f;
 
-                bobTimer += Time.deltaTime * bobFrequency * speedMultiplier * Mathf.PI * 2f;
-                if (bobTimer > Mathf.PI * 200f) bobTimer -= Mathf.PI * 200f; // Prevent floating point overflow
+                // Advance bobTimer so that bobFrequency directly controls steps per second:
+                // bobFrequency * PI rad/s advances 2*PI (one full stride = 2 steps) in (2 / bobFrequency) seconds.
+                bobTimer += Time.deltaTime * bobFrequency * speedMultiplier * Mathf.PI;
+                if (bobTimer > Mathf.PI * 200f) bobTimer -= Mathf.PI * 200f;
+
+                float effectiveAmp = bobAmplitude * bobPositionScale;
+                bool isSprinting = playerMovement != null && playerMovement.IsSprinting;
+                float sprintSwayDamp = isSprinting ? 0.65f : 1f;  // Narrower lateral stance when sprinting
+                float sprintDipBoost = isSprinting ? 1.2f : 1f;   // Deeper vertical step drive when sprinting
+
+                float stridePhase = bobTimer;
+                float stepPhase = bobTimer * 2f;
+
+                Vector3 targetBobPos;
+                Vector3 targetBobRot;
 
                 if (useProceduralHarmonics || bobCurveX == null || bobCurveY == null || bobCurveX.length == 0)
                 {
-                    // Lissajous dual harmonic:
-                    // Horizontal sway (stride): sin(t)
-                    // Vertical dip (steps): -cos(2t) * 0.5 (dips on each foot)
-                    float sin1 = Mathf.Sin(bobTimer);
-                    float cos2 = Mathf.Cos(bobTimer * 2f);
+                    // Stride sway (left to right, 1 cycle per 2 steps)
+                    float sinStride = Mathf.Sin(stridePhase);
 
-                    float xPos = sin1 * bobAmplitude * bobHorizontalMultiplier;
-                    float yPos = (-cos2 * 0.5f) * bobAmplitude * bobVerticalMultiplier;
+                    // Step vertical dip (parabolic compression downward from resting eye level, 2 dips per stride)
+                    // cos(0) = 1 -> dip = 0 (eye level), cos(pi) = -1 -> dip = -1 (foot plant)
+                    float cosStep = Mathf.Cos(stepPhase);
+                    float verticalDip = -(1f - cosStep) * 0.5f;
 
-                    // Rotational roll & pitch
-                    float zRoll = -sin1 * bobRollAmplitude;
-                    float xPitch = cos2 * bobPitchAmplitude;
+                    float xPos = sinStride * effectiveAmp * bobHorizontalMultiplier * sprintSwayDamp;
+                    float yPos = verticalDip * effectiveAmp * bobVerticalMultiplier * sprintDipBoost;
 
-                    currentBobPosOffset = new Vector3(xPos, yPos, 0f) * bobWeight;
-                    currentBobRotOffset = new Vector3(xPitch, 0f, zRoll) * bobWeight;
+                    // Subtle, grounded rotational tilt (banking with stride + slight nod on heel strike)
+                    float zRoll = -sinStride * bobRollAmplitude * sprintSwayDamp;
+                    float xPitch = verticalDip * bobPitchAmplitude;
+
+                    targetBobPos = new Vector3(xPos, yPos, 0f) * bobWeight;
+                    targetBobRot = new Vector3(xPitch, 0f, zRoll) * bobWeight;
                 }
                 else
                 {
@@ -324,20 +343,25 @@ namespace Nanodogs.UniversalScripts
                     float normalizedTimer = (bobTimer / (Mathf.PI * 2f)) % 1f;
                     if (normalizedTimer < 0f) normalizedTimer += 1f;
 
-                    float xOffset = bobCurveX.Evaluate(normalizedTimer) * bobAmplitude * bobHorizontalMultiplier;
-                    float yOffset = bobCurveY.Evaluate(normalizedTimer) * bobAmplitude * bobVerticalMultiplier;
+                    float xOffset = (bobCurveX.Evaluate(normalizedTimer) - 0.5f) * effectiveAmp * bobHorizontalMultiplier * sprintSwayDamp;
+                    float yOffset = -bobCurveY.Evaluate(normalizedTimer) * effectiveAmp * bobVerticalMultiplier * sprintDipBoost;
 
-                    float sin1 = Mathf.Sin(bobTimer);
-                    float cos2 = Mathf.Cos(bobTimer * 2f);
+                    float sinStride = Mathf.Sin(stridePhase);
+                    float cosStep = Mathf.Cos(stepPhase);
+                    float verticalDip = -(1f - cosStep) * 0.5f;
 
-                    currentBobPosOffset = new Vector3(xOffset, yOffset, 0f) * bobWeight;
-                    currentBobRotOffset = new Vector3(cos2 * bobPitchAmplitude, 0f, -sin1 * bobRollAmplitude) * bobWeight;
+                    targetBobPos = new Vector3(xOffset, yOffset, 0f) * bobWeight;
+                    targetBobRot = new Vector3(verticalDip * bobPitchAmplitude, 0f, -sinStride * bobRollAmplitude * sprintSwayDamp) * bobWeight;
                 }
+
+                // Smooth responsive tracking without secondary spring lag
+                currentBobPosOffset = Vector3.Lerp(currentBobPosOffset, targetBobPos, 1f - Mathf.Exp(-22f * Time.deltaTime));
+                currentBobRotOffset = Vector3.Lerp(currentBobRotOffset, targetBobRot, 1f - Mathf.Exp(-22f * Time.deltaTime));
             }
             else
             {
-                currentBobPosOffset = Vector3.Lerp(currentBobPosOffset, Vector3.zero, Time.deltaTime * bobFadeSpeed);
-                currentBobRotOffset = Vector3.Lerp(currentBobRotOffset, Vector3.zero, Time.deltaTime * bobFadeSpeed);
+                currentBobPosOffset = Vector3.Lerp(currentBobPosOffset, Vector3.zero, 1f - Mathf.Exp(-bobFadeSpeed * 2f * Time.deltaTime));
+                currentBobRotOffset = Vector3.Lerp(currentBobRotOffset, Vector3.zero, 1f - Mathf.Exp(-bobFadeSpeed * 2f * Time.deltaTime));
             }
         }
 
@@ -351,7 +375,7 @@ namespace Nanodogs.UniversalScripts
                 return;
             }
 
-            // Idle is active when not bobbing and grounded
+            // Idle is active when grounded and not actively bobbing
             bool isGrounded = IsGrounded();
             bool isMoving = bobWeight > 0.05f;
             float targetIdleWeight = (!isMoving && isGrounded) ? 1f : 0f;
@@ -362,26 +386,29 @@ namespace Nanodogs.UniversalScripts
                 idleTimer += Time.deltaTime * idleBobFrequency;
                 if (idleTimer > 10000f) idleTimer -= 10000f;
 
-                // Subtle breathing wave
+                // Calm, natural breathing cycle
                 float breathCycle = Mathf.Sin(idleTimer);
                 float breathSlow = Mathf.Cos(idleTimer * 0.5f);
 
-                // Position offset (mostly vertical expansion and subtle lateral drift)
+                // Very gentle vertical position breathing + subtle lateral shift
                 float idlePosY = breathCycle * idleBobPositionAmplitude;
-                float idlePosX = breathSlow * (idleBobPositionAmplitude * 0.4f);
+                float idlePosX = breathSlow * (idleBobPositionAmplitude * 0.3f);
 
-                // Rotational offset (gentle pitch nod, roll drift, and organic yaw drift)
+                // Subtle pitch breathing nod and low-frequency noise drift
                 float idlePitch = breathCycle * idleBobRotationAmplitude;
-                float idleRoll = breathSlow * (idleBobRotationAmplitude * 0.35f);
-                float idleYaw = (Mathf.PerlinNoise(idleTimer * 0.3f, 42.1f) - 0.5f) * (idleBobRotationAmplitude * 0.4f);
+                float idleRoll = breathSlow * (idleBobRotationAmplitude * 0.3f);
+                float idleYaw = (Mathf.PerlinNoise(idleTimer * 0.25f, 42.1f) - 0.5f) * (idleBobRotationAmplitude * 0.35f);
 
-                currentIdlePosOffset = new Vector3(idlePosX, idlePosY, 0f) * idleWeight;
-                currentIdleRotOffset = new Vector3(idlePitch, idleYaw, idleRoll) * idleWeight;
+                Vector3 targetIdlePos = new Vector3(idlePosX, idlePosY, 0f) * idleWeight;
+                Vector3 targetIdleRot = new Vector3(idlePitch, idleYaw, idleRoll) * idleWeight;
+
+                currentIdlePosOffset = Vector3.Lerp(currentIdlePosOffset, targetIdlePos, 1f - Mathf.Exp(-14f * Time.deltaTime));
+                currentIdleRotOffset = Vector3.Lerp(currentIdleRotOffset, targetIdleRot, 1f - Mathf.Exp(-14f * Time.deltaTime));
             }
             else
             {
-                currentIdlePosOffset = Vector3.Lerp(currentIdlePosOffset, Vector3.zero, Time.deltaTime * idleFadeSpeed);
-                currentIdleRotOffset = Vector3.Lerp(currentIdleRotOffset, Vector3.zero, Time.deltaTime * idleFadeSpeed);
+                currentIdlePosOffset = Vector3.Lerp(currentIdlePosOffset, Vector3.zero, 1f - Mathf.Exp(-idleFadeSpeed * 2f * Time.deltaTime));
+                currentIdleRotOffset = Vector3.Lerp(currentIdleRotOffset, Vector3.zero, 1f - Mathf.Exp(-idleFadeSpeed * 2f * Time.deltaTime));
             }
         }
 
@@ -389,7 +416,7 @@ namespace Nanodogs.UniversalScripts
         {
             Vector2 moveInput = (moveAction != null) ? moveAction.action.ReadValue<Vector2>() : Vector2.zero;
 
-            // Strafe banking (tilts camera into the strafe direction)
+            // Strafe banking (tilts camera subtly into strafe direction)
             float targetStrafeRoll = 0f;
             if (enableStrafeTilt)
             {
@@ -397,7 +424,7 @@ namespace Nanodogs.UniversalScripts
             }
             currentStrafeRoll = Mathf.Lerp(currentStrafeRoll, targetStrafeRoll, 1f - Mathf.Exp(-strafeTiltSpeed * Time.deltaTime));
 
-            // Mouse look banking (subtle roll when turning mouse quickly)
+            // Mouse look banking (subtle inertia when panning camera rapidly)
             float targetLookRoll = 0f;
             if (enableLookBanking)
             {
@@ -420,12 +447,12 @@ namespace Nanodogs.UniversalScripts
                     float excess = Mathf.Abs(downVelocity) - Mathf.Abs(landingVelocityThreshold);
                     float intensity = Mathf.Clamp01(excess / 8f);
 
-                    landingOffsetY = -landingBobAmount * (1f + intensity);
-                    landingPitchOffset = landingPitchAmount * (1f + intensity);
+                    landingOffsetY = -landingBobAmount * (1f + intensity * 0.5f);
+                    landingPitchOffset = landingPitchAmount * (1f + intensity * 0.5f);
                 }
             }
 
-            // Smooth spring return to zero
+            // Smooth spring return to resting position
             landingOffsetY = Mathf.SmoothDamp(landingOffsetY, 0f, ref landingPosLerpVelocity, 1f / landingBobReturnSpeed);
             landingPitchOffset = Mathf.SmoothDamp(landingPitchOffset, 0f, ref landingPitchLerpVelocity, 1f / landingBobReturnSpeed);
 
@@ -442,7 +469,7 @@ namespace Nanodogs.UniversalScripts
         {
             if (jumpRecoilOffset > 0.0001f || jumpRecoilOffset < -0.0001f)
             {
-                jumpRecoilOffset = Mathf.SmoothDamp(jumpRecoilOffset, 0f, ref jumpRecoilVelocity, 0.18f);
+                jumpRecoilOffset = Mathf.SmoothDamp(jumpRecoilOffset, 0f, ref jumpRecoilVelocity, 0.16f);
             }
         }
 
@@ -458,16 +485,12 @@ namespace Nanodogs.UniversalScripts
 
         protected void ApplyCameraTransforms()
         {
-            // Calculate combined position
+            // Position: Combine resting position with cleanly smoothed offsets
             Vector3 finalLocalPos = initialCameraLocalPos + currentBobPosOffset + currentIdlePosOffset;
             finalLocalPos.y += landingOffsetY + jumpRecoilOffset;
+            transform.localPosition = finalLocalPos;
 
-            // Apply position with frame-rate independent smoothing
-            float posBlend = 1f - Mathf.Exp(-bobFadeSpeed * 2.5f * Time.deltaTime);
-            transform.localPosition = Vector3.Lerp(transform.localPosition, finalLocalPos, posBlend);
-
-            // Calculate combined rotation:
-            // Pitch: look pitch + bob pitch + idle pitch + landing pitch - jump pitch
+            // Rotation: Look pitch + bob nods + idle breathing + landing impact - jump recoil
             float jumpPitch = (jumpRecoilPosition > 0.001f) ? (jumpRecoilOffset / jumpRecoilPosition) * jumpRecoilPitch : 0f;
             float totalPitch = xRotation + currentBobRotOffset.x + currentIdleRotOffset.x + landingPitchOffset - jumpPitch;
             float totalYaw = currentIdleRotOffset.y;

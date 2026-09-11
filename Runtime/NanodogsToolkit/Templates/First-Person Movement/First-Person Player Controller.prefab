@@ -96,6 +96,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!136 &901274630831295988
 CapsuleCollider:
@@ -165,7 +166,11 @@ MonoBehaviour:
   rb: {fileID: 6939925807832477495}
   moveAction: {fileID: -1913246952516052684, guid: a03cd7f3852b81443aaa5a09de549850, type: 3}
   jumpAction: {fileID: 5052146654967967306, guid: a03cd7f3852b81443aaa5a09de549850, type: 3}
+  sprintAction: {fileID: 0}
+  enableSprint: 1
+  sprintSpeed: 9
   accelerationSmoothTime: 0.08
+  airControlMultiplier: 0.5
   onLadder: 0
   ladderClimbSpeed: 7
   ladderStickStrength: 10
@@ -200,6 +205,7 @@ MonoBehaviour:
     - {fileID: 8300000, guid: a49a9fdcfa1cadd49ae9b1e51a628caa, type: 3}
     - {fileID: 8300000, guid: 0cb0aee1914c8cc479de9fd3042f3a06, type: 3}
     - {fileID: 8300000, guid: 4fe1f04627cc23741b12e14bbc9205fc, type: 3}
+  footstepPitchVariance: 0.06
 --- !u!114 &-6456593012921064906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -231,12 +237,6 @@ MonoBehaviour:
   equipped: {fileID: 0}
   inventoryUI: {fileID: 0}
   inventorySlotPrefab: {fileID: 4367925828372572674, guid: f565ebdd3c9c93d42ab3628610c1b7fd, type: 3}
-  keys:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
 --- !u!114 &2975202628466790550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -499,7 +499,7 @@ MonoBehaviour:
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
   m_RenderPostProcessing: 1
-  m_Antialiasing: 0
+  m_Antialiasing: 1
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 1
@@ -539,7 +539,7 @@ MonoBehaviour:
   yawPivot: {fileID: 5826257944945842293}
   enableHeadBob: 1
   bobFrequency: 2
-  bobAmplitude: 0.2
+  bobAmplitude: 2
   bobFadeSpeed: 6
   bobStartThreshold: 0.1
   bobCurveX:
@@ -626,14 +626,40 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  useProceduralHarmonics: 1
+  bobPositionScale: 0.1
+  bobHorizontalMultiplier: 0.35
+  bobVerticalMultiplier: 0.65
+  bobRollAmplitude: 0.45
+  bobPitchAmplitude: 0.22
+  scaleBobWithSpeed: 1
+  enableIdleMovement: 1
+  idleBobFrequency: 1.1
+  idleBobPositionAmplitude: 0.05
+  idleBobRotationAmplitude: 0.2
+  idleFadeSpeed: 3.5
+  enableStrafeTilt: 1
+  strafeTiltAngle: 1
+  strafeTiltSpeed: 8
+  enableLookBanking: 1
+  lookBankingStrength: 0.1
+  maxLookBankingAngle: 1.2
   enableLandingBob: 1
-  landingBobAmount: 0.1
-  landingBobSpeed: 10
+  landingBobAmount: 0.2
+  landingPitchAmount: 0.5
+  landingBobSpeed: 3
   landingBobReturnSpeed: 6
   landingVelocityThreshold: -4
+  enableJumpRecoil: 1
+  jumpRecoilPosition: 0.05
+  jumpRecoilPitch: 0.8
+  enableFovKick: 1
+  sprintFovOffset: 8
+  fovTransitionSpeed: 7
   playerRigidbody: {fileID: 6939925807832477495}
+  playerMovement: {fileID: 4372157008490153262}
   groundMask:
     serializedVersion: 2
     m_Bits: 1
-  groundCheckDistance: 0.5
+  groundCheckDistance: 1
   groundCheckOrigin: {fileID: 2759690086907853745}
