@@ -1,4 +1,4 @@
-﻿// © 2025 Nanodogs Studios. All rights reserved.
+// © 2025 Nanodogs Studios. All rights reserved.
 
 using UnityEngine;
 
@@ -13,13 +13,15 @@ namespace Nanodogs.UniversalScripts
         public float rayDistance = 1.1f;
         public Rigidbody rb;
 
-        protected void Start()
+        protected virtual void Start()
         {
-            rb = GetComponent<Rigidbody>();
-            rb.freezeRotation = true; // prevent tipping
+            if (rb == null)
+                rb = GetComponent<Rigidbody>();
+            if (rb != null)
+                rb.freezeRotation = true; // prevent tipping
         }
 
-        public bool IsGrounded()
+        public virtual bool IsGrounded()
         {
             // Simple ground check
             return Physics.Raycast(transform.position, Vector3.down, rayDistance);
