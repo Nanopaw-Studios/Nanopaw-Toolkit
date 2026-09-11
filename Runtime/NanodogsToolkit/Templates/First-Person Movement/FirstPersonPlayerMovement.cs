@@ -13,7 +13,7 @@ namespace Nanodogs.UniversalScripts
         public InputActionReference moveAction;
         public InputActionReference jumpAction;
 
-        private Vector3 inputDir;
+        protected Vector3 inputDir;
 
         [Header("Smoothing")]
         [Tooltip("Lower = snappier movement, Higher = smoother movement.")]
