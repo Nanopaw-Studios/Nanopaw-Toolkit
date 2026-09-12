@@ -2,6 +2,8 @@
 
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 
 namespace Nanodogs.UniversalScripts
 {
@@ -121,6 +123,25 @@ namespace Nanodogs.UniversalScripts
         [Tooltip("Speed of FOV expansion and recovery.")]
         public float fovTransitionSpeed = 7f;
 
+        [Header("Panini Projection")]
+        [Tooltip("Enables Panini projection on the camera to reduce wide FOV fisheye distortion and preserve straight vertical lines.")]
+        public bool enablePaniniProjection = false;
+        [Tooltip("Panini projection distance / strength factor (0 = standard perspective, 1 = full cylindrical panini projection).")]
+        [Range(0f, 1f)]
+        public float paniniDistance = 0.3f;
+        [Tooltip("Panini projection crop-to-fit factor (1 = crops to screen edges without black borders).")]
+        [Range(0f, 1f)]
+        public float paniniCropToFit = 1f;
+        [Tooltip("Subtly scales Panini projection strength when sprinting alongside FOV kick.")]
+        public bool scalePaniniWithSprint = true;
+        [Tooltip("Additional Panini distance offset applied while sprinting.")]
+        [Range(0f, 0.5f)]
+        public float sprintPaniniDistanceOffset = 0.1f;
+        [Tooltip("Speed at which Panini projection transitions smoothly in and out.")]
+        public float paniniTransitionSpeed = 8f;
+        [Tooltip("Optional Volume component to control. If unassigned, automatically detects or creates a dedicated local Volume on this camera.")]
+        public Volume postProcessVolume;
+
         [Header("References & Ground Check")]
         [Tooltip("Rigidbody of the player character.")]
         public Rigidbody playerRigidbody;
@@ -168,6 +189,12 @@ namespace Nanodogs.UniversalScripts
         private Camera camComponent;
         private float baseFov = 60f;
 
+        // Internal State - Panini Projection
+        private PaniniProjection paniniComponent;
+        private float currentPaniniDistance;
+        private Volume runtimeCreatedVolume;
+        private VolumeProfile runtimeCreatedProfile;
+
         protected void OnEnable()
         {
             if (lookAction != null) lookAction.action.Enable();
@@ -187,6 +214,28 @@ namespace Nanodogs.UniversalScripts
             if (playerMovement != null)
             {
                 playerMovement.OnJumped -= HandleJumpRecoil;
+            }
+
+            if (paniniComponent != null)
+            {
+                paniniComponent.active = false;
+                paniniComponent.distance.overrideState = false;
+            }
+            currentPaniniDistance = 0f;
+        }
+
+        protected void OnDestroy()
+        {
+            if (runtimeCreatedProfile != null)
+            {
+                Destroy(runtimeCreatedProfile);
+                runtimeCreatedProfile = null;
+            }
+
+            if (runtimeCreatedVolume != null)
+            {
+                Destroy(runtimeCreatedVolume);
+                runtimeCreatedVolume = null;
             }
         }
 
@@ -222,6 +271,11 @@ namespace Nanodogs.UniversalScripts
             {
                 groundCheckOrigin = playerRigidbody != null ? playerRigidbody.transform : transform.parent;
             }
+
+            if (enablePaniniProjection || postProcessVolume != null)
+            {
+                InitializePanini();
+            }
         }
 
         protected void Update()
@@ -233,6 +287,7 @@ namespace Nanodogs.UniversalScripts
             HandleLandingBob();
             HandleJumpSettling();
             HandleFovKick();
+            HandlePaniniProjection();
             ApplyCameraTransforms();
         }
 
@@ -481,6 +536,108 @@ namespace Nanodogs.UniversalScripts
             float targetFov = baseFov + (isSprinting ? sprintFovOffset : 0f);
 
             camComponent.fieldOfView = Mathf.Lerp(camComponent.fieldOfView, targetFov, 1f - Mathf.Exp(-fovTransitionSpeed * Time.deltaTime));
+        }
+
+        /// <summary>
+        /// Initializes the post-processing Volume and gets or adds the PaniniProjection component override.
+        /// </summary>
+        public void InitializePanini()
+        {
+            if (postProcessVolume == null)
+            {
+                postProcessVolume = GetComponent<Volume>();
+            }
+
+            if (postProcessVolume == null)
+            {
+                runtimeCreatedVolume = gameObject.AddComponent<Volume>();
+                runtimeCreatedVolume.isGlobal = true;
+                runtimeCreatedVolume.priority = 100f;
+                postProcessVolume = runtimeCreatedVolume;
+            }
+
+            if (postProcessVolume != null)
+            {
+                if (postProcessVolume.profile == null)
+                {
+                    runtimeCreatedProfile = ScriptableObject.CreateInstance<VolumeProfile>();
+                    runtimeCreatedProfile.name = $"{gameObject.name}_PaniniVolumeProfile";
+                    postProcessVolume.profile = runtimeCreatedProfile;
+                }
+
+                if (!postProcessVolume.profile.TryGet(out paniniComponent))
+                {
+                    paniniComponent = postProcessVolume.profile.Add<PaniniProjection>(overrides: true);
+                }
+            }
+        }
+
+        protected void HandlePaniniProjection()
+        {
+            if (!enablePaniniProjection && currentPaniniDistance <= 0.0001f)
+            {
+                if (paniniComponent != null && paniniComponent.active)
+                {
+                    paniniComponent.active = false;
+                    paniniComponent.distance.overrideState = false;
+                }
+                return;
+            }
+
+            if (paniniComponent == null)
+            {
+                InitializePanini();
+                if (paniniComponent == null) return;
+            }
+
+            bool isSprinting = scalePaniniWithSprint && playerMovement != null && playerMovement.IsSprinting;
+            float targetDistance = enablePaniniProjection ? Mathf.Clamp01(paniniDistance + (isSprinting ? sprintPaniniDistanceOffset : 0f)) : 0f;
+
+            currentPaniniDistance = Mathf.Lerp(currentPaniniDistance, targetDistance, 1f - Mathf.Exp(-paniniTransitionSpeed * Time.deltaTime));
+
+            bool shouldBeActive = currentPaniniDistance > 0.0005f;
+            paniniComponent.active = shouldBeActive;
+            paniniComponent.distance.overrideState = shouldBeActive;
+            paniniComponent.distance.value = currentPaniniDistance;
+            paniniComponent.cropToFit.overrideState = shouldBeActive;
+            paniniComponent.cropToFit.value = paniniCropToFit;
+        }
+
+        /// <summary>
+        /// Enables or disables Panini projection and optionally updates distance and crop settings.
+        /// </summary>
+        public void SetPaniniProjection(bool enable, float distance = -1f, float cropToFit = -1f)
+        {
+            enablePaniniProjection = enable;
+            if (distance >= 0f) paniniDistance = Mathf.Clamp01(distance);
+            if (cropToFit >= 0f) paniniCropToFit = Mathf.Clamp01(cropToFit);
+        }
+
+        /// <summary>
+        /// Sets the Panini projection distance / strength.
+        /// </summary>
+        public void SetPaniniDistance(float distance)
+        {
+            paniniDistance = Mathf.Clamp01(distance);
+        }
+
+        protected void OnValidate()
+        {
+            paniniDistance = Mathf.Clamp01(paniniDistance);
+            paniniCropToFit = Mathf.Clamp01(paniniCropToFit);
+            sprintPaniniDistanceOffset = Mathf.Clamp01(sprintPaniniDistanceOffset);
+
+            if (Application.isPlaying && paniniComponent != null)
+            {
+                float targetDist = enablePaniniProjection ? paniniDistance : 0f;
+                currentPaniniDistance = targetDist;
+                bool shouldBeActive = targetDist > 0.0005f;
+                paniniComponent.active = shouldBeActive;
+                paniniComponent.distance.overrideState = shouldBeActive;
+                paniniComponent.distance.value = targetDist;
+                paniniComponent.cropToFit.overrideState = shouldBeActive;
+                paniniComponent.cropToFit.value = paniniCropToFit;
+            }
         }
 
         protected void ApplyCameraTransforms()

@@ -9,13 +9,26 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 11e3684c4e0ff324bb21ea8fb0394978, type: 3}
+  m_Script: {fileID: 11500000, guid: a63cc7f181b7495b86b7e3ddbfa0eceb, type: 3}
   m_Name: Test
-  m_EditorClassIdentifier: Nanodogs.Tooklit::Nanodogs.API.NanoMissions.NanoMission
-  missionName: Test Mission
-  description: 'a test mission
-
-'
-  state: 0
+  m_EditorClassIdentifier: Nanodogs.Tooklit::Nanodogs.Toolkit.Missions.NanoMissionData
+  missionId: test_mission
+  missionTitle: Test Mission
+  category: Tutorial
+  description: A test mission to demonstrate reaching the Grass Ball.
+  autoStart: 1
+  sequentialObjectives: 0
+  nextMission: {fileID: 0}
+  rewardText: 50 XP
   objectives:
-  - {fileID: 11400000, guid: bdade096694e39446991c3c49f32a52a, type: 2}
+  - id: obj_grassball
+    title: Go to the Grass Ball
+    description: Head towards the large grass sphere.
+    type: 0
+    targetPosition: {x: -7.5, y: 2.5, z: 2.5}
+    radius: 6
+    targetZoneId: ''
+    targetTag: ''
+    requiredAmount: 1
+    timerDuration: 30
+    isOptional: 0
