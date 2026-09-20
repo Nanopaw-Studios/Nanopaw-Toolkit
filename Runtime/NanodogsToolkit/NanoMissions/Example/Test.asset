@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a63cc7f181b7495b86b7e3ddbfa0eceb, type: 3}
+  m_Name: Test
+  m_EditorClassIdentifier: Nanodogs.Tooklit::Nanodogs.Toolkit.Missions.NanoMissionData
+  missionId: test_mission
+  missionTitle: Test Mission
+  category: Tutorial
+  description: A test mission to demonstrate reaching the Grass Ball.
+  autoStart: 1
+  sequentialObjectives: 0
+  nextMission: {fileID: 0}
+  rewardText: 50 XP
+  objectives:
+  - id: obj_grassball
+    title: Go to the Grass Ball
+    description: Head towards the large grass sphere.
+    type: 0
+    targetPosition: {x: -7.5, y: 2.5, z: 2.5}
+    radius: 6
+    targetZoneId: ''
+    targetTag: ''
+    requiredAmount: 1
+    timerDuration: 30
+    isOptional: 0
